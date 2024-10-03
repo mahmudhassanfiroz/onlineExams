@@ -1,0 +1,21 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ফলাফল তুলনা</h1>
+<img src="data:image/png;base64,{{ graphic }}" alt="Score Progression">
+<table>
+    <tr>
+        <th>পরীক্ষা</th>
+        <th>তারিখ</th>
+        <th>স্কোর</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+        <td>{{ result.exam.title }}</td>
+        <td>{{ result.submission_time }}</td>
+        <td>{{ result.score }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

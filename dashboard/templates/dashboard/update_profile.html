@@ -1,0 +1,13 @@
+
+<!-- dashboard/templates/dashboard/update_profile.html -->
+
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<h2>প্রোফাইল আপডেট করুন</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">আপডেট করুন</button>
+</form>
+{% endblock %}

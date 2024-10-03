@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>আসন্ন এবং চলমান লাইভ পরীক্ষাসমূহ</h1>
+<div class="exam-list">
+    {% for exam in live_exams %}
+        <div class="exam-item" id="exam-{{ exam.id }}">
+            <h2>{{ exam.title }}</h2>
+            <p>তারিখ: {{ exam.exam_date }}</p>
+            <p>শুরুর সময়: {{ exam.start_time }}</p>
+            <p>সময়কাল: {{ exam.duration }}</p>
+            <div id="countdown-{{ exam.id }}"></div>
+            <button id="start-button-{{ exam.id }}" 
+                    onclick="startExam({{ exam.id }})" 
+                    {% if not exam.is_active %}disabled{% endif %}>
+                পরীক্ষা শুরু করুন
+            </button>
+        </div>
+    {% empty %}
+        <p>কোনো আসন্ন বা চলমান পরীক্ষা নেই।</p>
+    {% endfor %}
+</div>
+
+{% if live_exams.has_other_pages %}
+    <nav>
+        <ul class="pagination">
+            {% if live_exams.has_previous %}
+                <li><a href="?page={{ live_exams.previous_page_number }}">&laquo;</a></li>
+            {% endif %}
+            
+            {% for i in live_exams.paginator.page_range %}
+                {% if live_exams.number == i %}
+                    <li class="active"><span>{{ i }}</span></li>
+                {% else %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if live_exams.has_next %}
+                <li><a href="?page={{ live_exams.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+<script>
+    function updateCountdown() {
+        {% for exam in live_exams %}
+            var examId = {{ exam.id }};
+            var countdownElement = document.getElementById("countdown-" + examId);
+            var startButton = document.getElementById("start-button-" + examId);
+            
+            fetch("{% url 'liveExam:exam_status' exam.id %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_started) {
+                        if (data.is_ongoing) {
+                            countdownElement.innerHTML = "পরীক্ষা চলছে! শেষ হতে বাকি: " + data.time_remaining;
+                            startButton.disabled = false;
+                            startButton.innerHTML = "পরীক্ষায় যোগ দিন";
+                        } else {
+                            countdownElement.innerHTML = "পরীক্ষা শেষ হয়েছে।";
+                            startButton.disabled = true;
+                            startButton.innerHTML = "পরীক্ষা শেষ";
+                        }
+                    } else {
+                        countdownElement.innerHTML = "পরীক্ষা শুরু হতে বাকি: " + data.time_until_start;
+                        startButton.disabled = true;
+                        startButton.innerHTML = "পরীক্ষা শুরু করুন";
+                    }
+                });
+        {% endfor %}
+    }
+
+    function startExam(examId) {
+        window.location.href = "/liveExam/exam/" + examId + "/start/";
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+</script>
+{% endblock %}

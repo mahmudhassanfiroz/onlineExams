@@ -1,0 +1,10 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ফলাফলের সারসংক্ষেপ</h1>
+<p>মোট পরীক্ষা: {{ total_exams }}</p>
+<p>মোট স্কোর: {{ total_score }}</p>
+<p>সঠিক উত্তর: {{ total_correct }}</p>
+<p>ভুল উত্তর: {{ total_wrong }}</p>
+{% endblock %}

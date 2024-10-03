@@ -1,0 +1,20 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ড্যাশবোর্ড কাস্টমাইজ করুন</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="layout">লেআউট নির্বাচন করুন:</label>
+        <select name="layout" id="layout" class="form-control">
+            <option value="default">ডিফল্ট</option>
+            <option value="compact">কম্প্যাক্ট</option>
+            <option value="expanded">বিস্তৃত</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">সংরক্ষণ করুন</button>
+</form>
+
+{% endblock %}

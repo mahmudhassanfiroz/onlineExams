@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ফেরতের আবেদন</h1>
+
+<p>লেনদেন আইডি: {{ payment.transaction_id }}</p>
+<p>পরিমাণ: {{ payment.amount }} টাকা</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">আবেদন জমা দিন</button>
+</form>
+{% endblock %}

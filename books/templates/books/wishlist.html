@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>আপনার উইশলিস্ট</h1>
+
+<div class="wishlist">
+    {% for item in wishlist_items %}
+        <div class="book-card">
+            <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}">
+            <h3>{{ item.book.title }}</h3>
+            <p>লেখক: {{ item.book.author.name }}</p>
+            <p>মূল্য: {{ item.book.price }} টাকা</p>
+            <a href="{% url 'books:book_detail' item.book.id %}">বিস্তারিত দেখুন</a>
+            <button class="remove-from-wishlist" data-book-id="{{ item.book.id }}">উইশলিস্ট থেকে সরান</button>
+        </div>
+    {% empty %}
+        <p>আপনার উইশলিস্টে কোনো বই নেই।</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('.remove-from-wishlist').click(function() {
+            var bookId = $(this).data('book-id');
+            var button = $(this);
+            $.ajax({
+                url: '/books/remove-from-wishlist/' + bookId + '/',
+                method: 'POST',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        button.closest('.book-card').remove();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

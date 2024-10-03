@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_post.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">{% if post %}পোস্ট সম্পাদনা করুন{% else %}নতুন পোস্ট তৈরি করুন{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="post-form">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="mb-3">
+                            <label for="id_tags" class="form-label">ট্যাগ</label>
+                            <select multiple class="form-select" id="id_tags" name="tags">
+                                {% for tag in form.fields.tags.queryset %}
+                                    <option value="{{ tag.id }}" {% if tag in form.instance.tags.all %}selected{% endif %}>{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">একাধিক ট্যাগ নির্বাচন করতে Ctrl বা Cmd কী চেপে ধরে রাখুন।</small>
+                        </div>
+                        {% if post.image %}
+                        <div class="mb-3">
+                            <label class="form-label">বর্তমান ছবি</label>
+                            <img src="{{ post.image.url }}" alt="Current Image" class="img-fluid mb-2" id="current-image">
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label">নতুন ছবি (ঐচ্ছিক)</label>
+                            <input type="file" class="form-control" id="id_image" name="image" accept="image/*">
+                        </div>
+                        <div id="image-preview-container" class="mb-3" style="display: none;">
+                            <label class="form-label">ছবি প্রিভিউ</label>
+                            <img id="image-preview" src="#" alt="Image Preview" class="img-fluid">
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary" id="submit-btn">
+                                {% if post %}পোস্ট সম্পাদনা করুন{% else %}পোস্ট তৈরি করুন{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/edit_post.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        // ইমেজ প্রিভিউ দেখানোর জন্য
+        $('#id_image').change(function() {
+            readURL(this);
+        });
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#image-preview').attr('src', e.target.result);
+                    $('#image-preview-container').show();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // ফর্ম সাবমিশনের সময় লোডিং স্পিনার দেখানোর জন্য
+        $('#post-form').submit(function() {
+            $('#submit-btn').prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> প্রক্রিয়াধীন...'
+            );
+        });
+    });
+</script>
+{% endblock %}
+
+

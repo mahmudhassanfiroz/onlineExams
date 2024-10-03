@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ service.name }} - বিস্তারিত{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">{{ service.name }}</h1>
+            
+            {% if service.image %}
+                <img src="{{ service.image.url }}" class="img-fluid mb-4 rounded" alt="{{ service.name }}">
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">সার্ভিস বিবরণ</h5>
+                    <p class="card-text">{{ service.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">বৈশিষ্ট্য</h5>
+                    <p class="card-text">{{ service.features|linebreaks }}</p>
+                </div>
+            </div>
+            
+            <h2 class="mt-5 mb-4">প্যাকেজসমূহ</h2>
+            {% if packages %}
+                <div class="row">
+                    {% for package in packages %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 {% if forloop.first %}border-primary{% endif %}">
+                                <div class="card-header {% if forloop.first %}bg-primary text-white{% endif %}">
+                                    <h5 class="card-title mb-0">{{ package.name }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ package.description }}</p>
+                                    <p class="card-text">মূল্য: {{ package.price }} টাকা</p>
+                                    <p class="card-text">মেয়াদ: {{ package.duration }}</p>
+                                    <a href="{% url 'services:service_registration' slug=service.slug %}?package={{ package.id }}" class="btn btn-primary btn-block">কিনুন</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">এই সার্ভিসের জন্য কোনো প্যাকেজ পাওয়া যায়নি।</div>
+            {% endif %}
+            
+            <h2 class="mt-5 mb-4">পরীক্ষাসমূহ</h2>
+            {% if exams %}
+                <ul class="list-group">
+                    {% for exam in exams %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{% url 'exams:exam_category_detail' exam.id %}">{{ exam.title }}</a>
+                        {% if exam.is_live %}
+                        <span class="badge bg-primary rounded-pill">লাইভ</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="alert alert-info">এই সার্ভিসের জন্য কোনো পরীক্ষা পাওয়া যায়নি।</div>
+            {% endif %}
+            
+            <h2 class="mt-5 mb-4">রিভিউসমূহ</h2>
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">{{ review.user.username }}</h5>
+                                <span class="badge bg-primary">{{ review.rating }} / 5</span>
+                            </div>
+                            <p class="card-text">{{ review.comment }}</p>
+                            <p class="card-text"><small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small></p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">এই সার্ভিসের জন্য কোনো রিভিউ পাওয়া যায়নি।</div>
+            {% endif %}
+            <a href="{% url 'services:add_review' category_slug=service.category.slug service_slug=service.slug %}" class="btn btn-secondary mt-3">রিভিউ লিখুন</a>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">সার্ভিস তথ্য</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ক্যাটাগরি:</strong> {{ service.category.name }}</p>
+                    {% if service.is_free %}
+                        <p class="text-success"><strong>মূল্য:</strong> বিনামূল্যে</p>
+                    {% else %}
+                        <p><strong>মূল্য:</strong> {{ service.price }} টাকা</p>
+                    {% endif %}
+                    <!-- এখানে আরও তথ্য যোগ করুন যদি প্রয়োজন হয় -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">সচরাচর জিজ্ঞাসা (FAQ)</h5>
+                </div>
+                <div class="card-body">
+                    {% if faqs %}
+                        <div id="faqAccordion">
+                            {% for faq in faqs %}
+                                <div class="card mb-2">
+                                    <div class="card-header" id="faqHeading{{ forloop.counter }}">
+                                        <h6 class="mb-0">
+                                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ forloop.counter }}" aria-expanded="false" aria-controls="faqCollapse{{ forloop.counter }}">
+                                                {{ faq.question }}
+                                            </button>
+                                        </h6>
+                                    </div>
+                                    <div id="faqCollapse{{ forloop.counter }}" class="collapse" aria-labelledby="faqHeading{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+                                        <div class="card-body">
+                                            {{ faq.answer|linebreaks }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">এই সার্ভিসের জন্য কোনো FAQ পাওয়া যায়নি।</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('.collapse').on('show.bs.collapse', function () {
+            $(this).prev('.card-header').find('.btn-link').addClass('active');
+        });
+
+        $('.collapse').on('hide.bs.collapse', function () {
+            $(this).prev('.card-header').find('.btn-link').removeClass('active');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ফলাফল বিশ্লেষণ</h1>
+<p>মোট প্রশ্ন: {{ result.total_questions }}</p>
+<p>সঠিক উত্তর: {{ result.correct_answers }}</p>
+<p>ভুল উত্তর: {{ result.wrong_answers }}</p>
+<p>স্কোর: {{ result.score }}</p>
+<p>শতকরা হার: {{ result.calculate_percentage|floatformat:2 }}%</p>
+{% endblock %}

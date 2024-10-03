@@ -1,0 +1,184 @@
+
+#sticky-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: top 0.3s;
+}
+
+body {
+    padding-top: 56px; /* নেভিগেশন বারের উচ্চতার সমান */
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: 72px; /* বড় স্ক্রিনে নেভিগেশন বারের উচ্চতা বেশি হলে */
+    }
+}
+
+.carousel-item {
+    height: 500px; /* আপনার প্রয়োজন অনুযায়ী সামঞ্জস্য করুন */
+}
+
+.carousel-item img {
+    object-fit: cover;
+    height: 100%;
+}
+
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.marquee-notice {
+    overflow: hidden;
+}
+
+.marquee-notice marquee {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.marquee-notice a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.marquee-notice a:hover {
+    text-decoration: underline;
+}
+
+.service-packages .card {
+    transition: transform 0.3s;
+}
+
+.service-packages .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.service-packages .card-header {
+    font-size: 1.5em;
+}
+
+.service-packages .card-body h4 {
+    font-size: 2em;
+    color: #28a745;
+}
+
+.service-packages ul li {
+    margin-bottom: 10px;
+}
+
+.faq-section .accordion-button:not(.collapsed) {
+    background-color: #007bff;
+    color: white;
+}
+
+.faq-section .accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,.125);
+}
+
+.faq-section .accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.faq-section .accordion-body {
+    background-color: #f8f9fa;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.book-cover {
+    transition: transform 0.3s ease-in-out;
+}
+
+.book-cover:hover {
+    transform: scale(1.05);
+}
+
+.review-card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.review-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.star-rating {
+    color: #ffc107;
+}
+
+
+.book-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.book-card img {
+    height: 250px;
+    object-fit: cover;
+}
+
+.featured-books .book-card img {
+    height: 300px;
+}
+
+.search-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.post-card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.post-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.tags .badge {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar-sticky {
+    position: sticky;
+    top: 20px;
+}
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+}
+
+#notificationLink .fa-bell {
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+#notificationCount {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+}

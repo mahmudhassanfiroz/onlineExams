@@ -1,0 +1,18 @@
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}প্রশ্ন ফর্ম{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{% if question %}প্রশ্ন সম্পাদনা{% else %}নতুন প্রশ্ন তৈরি{% endif %}</h1>
+    <h2>ক্যাটাগরি: {{ category.name }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">{% if question %}আপডেট করুন{% else %}তৈরি করুন{% endif %}</button>
+    </form>
+</div>
+{% endblock %}

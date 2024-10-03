@@ -1,0 +1,22 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ batch.name }}</h1>
+<p>ক্যাটাগরি: {{ batch.category.name }}</p>
+<p>শুরুর তারিখ: {{ batch.start_date }}</p>
+<p>শেষের তারিখ: {{ batch.end_date }}</p>
+<p>সময়: {{ batch.time }}</p>
+
+<h2>পরীক্ষার সময়সূচি</h2>
+<ul>
+{% for schedule in exam_schedules %}
+    <li>
+        {{ schedule.exam_date }} - {{ schedule.duration }}
+        <a href="{% url 'exams:exam_registration' schedule.id %}">রেজিস্ট্রেশন করুন</a>
+    </li>
+{% empty %}
+    <li>কোনো পরীক্ষার সময়সূচি পাওয়া যায়নি।</li>
+{% endfor %}
+</ul>
+{% endblock %}

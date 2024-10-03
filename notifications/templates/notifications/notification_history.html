@@ -1,0 +1,21 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>নোটিফিকেশন ইতিহাস</h1>
+
+<div id="notification-history">
+    {% for notification in notifications %}
+        <div class="notification">
+            <i class="{{ notification.notification_type.icon }}" style="color: {{ notification.notification_type.color }};"></i>
+            <h3>{{ notification.title }}</h3>
+            <p>{{ notification.message }}</p>
+            <small>{{ notification.created_at }}</small>
+        </div>
+    {% empty %}
+        <p>কোনো নোটিফিকেশন ইতিহাস নেই।</p>
+    {% endfor %}
+</div>
+
+<a href="{% url 'notifications:notification_list' %}">নোটিফিকেশন তালিকায় ফিরে যান</a>
+{% endblock %}

@@ -1,0 +1,30 @@
+
+{% extends 'base.html' %}
+
+{% block title %}মক পরীক্ষা{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">মক পরীক্ষা: {{ category.name }}</h1>
+
+    <form method="post" action="{% url 'exams:submit_mock_exam' %}">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ forloop.counter }}. {{ question.text }}</h5>
+                    {% for option in question.get_options %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="q{{ question.id }}" id="q{{ question.id }}_{{ forloop.counter }}" value="{{ option }}">
+                            <label class="form-check-label" for="q{{ question.id }}_{{ forloop.counter }}">
+                                {{ option }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">পরীক্ষা জমা দিন</button>
+    </form>
+</div>
+{% endblock %}

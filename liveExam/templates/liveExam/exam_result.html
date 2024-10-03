@@ -1,0 +1,10 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>পরীক্ষার ফলাফল</h1>
+<h2>{{ exam.title }}</h2>
+<p>স্কোর: {{ score|floatformat:2 }}%</p>
+<p>সঠিক উত্তর: {{ correct_answers }}/{{ total_questions }}</p>
+<a href="{% url 'generate_pdf_result' exam.id %}" class="btn btn-primary">PDF ডাউনলোড করুন</a>
+{% endblock %}

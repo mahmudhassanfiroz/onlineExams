@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>পেমেন্ট প্রক্রিয়া</h1>
+
+<h2>{{ plan.name }}</h2>
+<p>মূল্য: {{ plan.price }} টাকা</p>
+
+<form action="{% url 'payments:process_payment' registration_id=registration.id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">পেমেন্ট করুন</button>
+</form>
+{% endblock %}

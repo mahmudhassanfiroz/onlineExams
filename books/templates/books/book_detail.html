@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/book_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid rounded shadow-lg">
+        </div>
+        <div class="col-md-8">
+            <h1 class="display-4 mb-3">{{ book.title }}</h1>
+            <p class="lead">লেখক: <a href="{% url 'books:author_detail' book.author.id %}" class="text-decoration-none">{{ book.author.name }}</a></p>
+            <p><strong>প্রকাশক:</strong> {{ book.publisher }}</p>
+            <p><strong>প্রকাশের তারিখ:</strong> {{ book.publication_date }}</p>
+            <p><strong>ক্যাটাগরি:</strong> <a href="{% url 'books:category_detail' book.category.id %}" class="badge bg-primary text-decoration-none">{{ book.category.name }}</a></p>
+            <div class="my-4">
+                {% if book.is_free %}
+                    <h3 class="text-success">এই বইটি বিনামূল্যে</h3>
+                    {% if book.pdf_file %}
+                        <a href="{% url 'books:download_book' book.id %}" class="btn btn-success btn-lg mt-2"><i class="fas fa-download me-2"></i>পিডিএফ ডাউনলোড করুন</a>
+                    {% else %}
+                        <p class="text-muted">দুঃখিত, এই মুহূর্তে পিডিএফ ফাইল উপলব্ধ নেই।</p>
+                    {% endif %}
+                {% else %}
+                    <h3 class="text-primary">মূল্য: {{ book.price }} টাকা</h3>
+                    {% if user.is_authenticated %}
+                        {% if user_has_purchased %}
+                            <a href="{% url 'books:download_book' book.id %}" class="btn btn-success btn-lg mt-2"><i class="fas fa-download me-2"></i>পিডিএফ ডাউনলোড করুন</a>
+                        {% else %}
+                            <a href="{% url 'books:purchase_book' book.id %}" class="btn btn-primary btn-lg mt-2"><i class="fas fa-shopping-cart me-2"></i>কিনুন</a>
+                        {% endif %}
+                    {% else %}
+                        <p>বইটি কিনতে <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">লগইন</a> করুন।</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% if user.is_authenticated %}
+                <button id="add-to-wishlist" data-book-id="{{ book.id }}" class="btn btn-outline-primary"><i class="fas fa-heart me-2"></i>উইশলিস্টে যোগ করুন</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <h2 class="mb-4">বর্ণনা</h2>
+            <p class="lead">{{ book.description }}</p>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title">রিভিউ এবং রেটিং</h3>
+                    <h4 class="text-warning mb-3">
+                        <i class="fas fa-star"></i> 
+                        {{ avg_rating|default:"কোনো রেটিং নেই" }}
+                    </h4>
+                    {% if user.is_authenticated and user_has_purchased %}
+                        <h5>রিভিউ লিখুন</h5>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>জমা দিন</button>
+                        </form>
+                    {% elif user.is_authenticated %}
+                        <p class="text-muted">রিভিউ লিখতে বইটি কিনুন।</p>
+                    {% else %}
+                        <p class="text-muted">রিভিউ লিখতে লগইন করুন।</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">রিভিউসমূহ</h3>
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{ review.user.username }}</h5>
+                            <p class="text-warning">
+                                {% for i in review.rating|ljust:5 %}
+                                    {% if i == ' ' %}
+                                        <i class="far fa-star"></i>
+                                    {% else %}
+                                        <i class="fas fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <p class="card-text">{{ review.comment }}</p>
+                        <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted">এখনও কোনো রিভিউ নেই।</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#add-to-wishlist').click(function() {
+            var bookId = $(this).data('book-id');
+            $.ajax({
+                url: '/books/add-to-wishlist/' + bookId + '/',
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'সফল!',
+                            text: 'বইটি উইশলিস্টে যোগ করা হয়েছে।',
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

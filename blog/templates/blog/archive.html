@@ -1,0 +1,61 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/archive.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">ব্লগ আর্কাইভ</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% regroup posts by created_at.year as year_list %}
+            {% for year in year_list %}
+                <h2>{{ year.grouper }}</h2>
+                <ul class="list-unstyled">
+                    {% regroup year.list by created_at|date:"F" as month_list %}
+                    {% for month in month_list %}
+                        <li>
+                            <h3>{{ month.grouper }}</h3>
+                            <ul class="list-unstyled ml-4">
+                                {% for post in month.list %}
+                                    <li class="mb-2">
+                                        <a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a>
+                                        <small class="text-muted">({{ post.created_at|date:"d F, Y" }})</small>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <p>কোনো পোস্ট পাওয়া যায়নি।</p>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>জনপ্রিয় ট্যাগ</h4>
+                </div>
+                <div class="card-body">
+                    {% for tag in popular_tags %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="btn btn-outline-primary btn-sm m-1">
+                            {{ tag.name }} ({{ tag.post_count }})
+                        </a>
+                    {% empty %}
+                        <p>কোনো ট্যাগ পাওয়া যায়নি।</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/archive.js' %}"></script>
+{% endblock %}

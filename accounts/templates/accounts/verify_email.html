@@ -1,0 +1,26 @@
+
+{% extends 'base.html' %}
+
+{% block title %}ইমেইল যাচাইকরণ - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">ইমেইল যাচাইকরণ</h2>
+                </div>
+                <div class="card-body">
+                    <p>আপনার ইমেইল ঠিকানায় একটি যাচাইকরণ কোড পাঠানো হয়েছে। অনুগ্রহ করে সেই কোডটি নিচে লিখুন।</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">যাচাই করুন</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

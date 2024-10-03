@@ -1,0 +1,22 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ category.name }}</h1>
+<p>{{ category.description }}</p>
+
+<h2>এই ক্যাটাগরির বইসমূহ</h2>
+<div class="book-list">
+    {% for book in books %}
+        <div class="book-card">
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            <h3>{{ book.title }}</h3>
+            <p>লেখক: {{ book.author.name }}</p>
+            <p>মূল্য: {{ book.price }} টাকা</p>
+            <a href="{% url 'books:book_detail' book.id %}">বিস্তারিত দেখুন</a>
+        </div>
+    {% empty %}
+        <p>এই ক্যাটাগরিতে কোনো বই পাওয়া যায়নি।</p>
+    {% endfor %}
+</div>
+{% endblock %}

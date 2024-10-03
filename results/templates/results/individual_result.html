@@ -1,0 +1,14 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ result.exam.title }} এর ফলাফল</h1>
+<p>নাম: {{ result.user.get_full_name }}</p>
+<p>ব্যবহারকারীর নাম: {{ result.user.username }}</p>
+<p>ব্যাচ: {{ result.exam.batch.name }}</p>
+<p>পরীক্ষার তারিখ: {{ result.submission_time }}</p>
+<p>স্কোর: {{ result.score }}</p>
+<p>সঠিক উত্তর: {{ result.correct_answers }}</p>
+<p>ভুল উত্তর: {{ result.wrong_answers }}</p>
+<a href="{% url 'results:generate_pdf' result.id %}">PDF ডাউনলোড করুন</a>
+{% endblock %}

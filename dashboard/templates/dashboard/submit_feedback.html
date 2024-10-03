@@ -1,0 +1,16 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ফিডব্যাক জমা দিন</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="message">আপনার মতামত:</label>
+        <textarea name="message" id="message" class="form-control" rows="5" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">জমা দিন</button>
+</form>
+
+{% endblock %}

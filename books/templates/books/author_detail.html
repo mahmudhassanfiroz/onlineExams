@@ -1,0 +1,24 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ author.name }}</h1>
+{% if author.photo %}
+    <img src="{{ author.photo.url }}" alt="{{ author.name }}">
+{% endif %}
+<p>{{ author.bio }}</p>
+
+<h2>{{ author.name }} এর বইসমূহ</h2>
+<div class="book-list">
+    {% for book in books %}
+        <div class="book-card">
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            <h3>{{ book.title }}</h3>
+            <p>মূল্য: {{ book.price }} টাকা</p>
+            <a href="{% url 'books:book_detail' book.id %}">বিস্তারিত দেখুন</a>
+        </div>
+    {% empty %}
+        <p>এই লেখকের কোনো বই পাওয়া যায়নি।</p>
+    {% endfor %}
+</div>
+{% endblock %}

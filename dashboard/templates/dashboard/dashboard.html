@@ -1,0 +1,84 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>ড্যাশবোর্ড</h1>
+
+<div class="user-overview">
+    <h2>{{ user_profile.user.get_full_name }}</h2>
+    <p>ব্যাচ: {{ user_profile.batch.name }}</p>
+    {% if user_profile.profile_picture %}
+        <img src="{{ user_profile.profile_picture.url }}" alt="প্রোফাইল ছবি">
+    {% endif %}
+</div>
+
+<div class="upcoming-exams">
+    <h3>আসন্ন পরীক্ষা</h3>
+    <ul>
+    {% for exam in upcoming_exams %}
+        <li>
+            {{ exam.title }} - {{ exam.start_time|date:"F d, Y H:i" }}
+            {% if exam.id in user_registered_exams %}
+                <span class="badge bg-success">নিবন্ধিত</span>
+            {% else %}
+                <a href="{% url 'exams:exam_registration' exam.id %}" class="btn btn-primary btn-sm">নিবন্ধন করুন</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>কোনো আসন্ন পরীক্ষা নেই।</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="recent-results">
+    <h3>সাম্প্রতিক ফলাফল</h3>
+    <ul>
+    {% for result in recent_results %}
+        <li>
+            {{ result.exam.title }} - স্কোর: {{ result.score }}
+            <a href="{% url 'results:individual_result' result.id %}">বিস্তারিত দেখুন</a>
+        </li>
+    {% empty %}
+        <li>কোনো সাম্প্রতিক ফলাফল নেই।</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="notifications">
+    <h3>নোটিফিকেশন</h3>
+    <ul>
+    {% for notification in notifications %}
+        <li>{{ notification.message }}</li>
+    {% empty %}
+        <li>কোনো নতুন নোটিফিকেশন নেই।</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="quick-links">
+    <h3>দ্রুত লিঙ্ক</h3>
+    <ul>
+        <li><a href="{% url 'exams:category_list' %}">পরীক্ষা তালিকা</a></li>
+        <li><a href="{% url 'results:overview' %}">ফলাফল সারসংক্ষেপ</a></li>
+        <li><a href="{% url 'accounts:account_settings' %}">একাউন্ট সেটিংস</a></li>
+    </ul>
+</div>
+
+<div class="recent-activity">
+    <h3>সাম্প্রতিক কার্যক্রম</h3>
+    <ul>
+    {% for activity in recent_activities %}
+        <li>{{ activity.description }} - {{ activity.created_at|timesince }} আগে</li>
+    {% empty %}
+        <li>কোনো সাম্প্রতিক কার্যক্রম নেই।</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="user-support">
+    <h3>সহায়তা</h3>
+    {% comment %} <a href="{% url 'services:service_faq' service_id.id %}">সাধারণ প্রশ্নোত্তর</a> {% endcomment %}
+    <a href="{% url 'contact' %}">যোগাযোগ করুন</a>
+</div>
+
+{% endblock %}

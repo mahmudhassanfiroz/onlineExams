@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- মার্কি নোটিশ শুরু -->
+{% if active_notices %}
+<div class="marquee-notice bg-warning text-dark py-2">
+    <div class="container">
+        <marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();">
+            {% for notice in active_notices %}
+                {{ notice.message }}{% if not forloop.last %} | {% endif %}
+            {% endfor %}
+        </marquee>
+    </div>
+</div>
+{% endif %}
+<!-- মার্কি নোটিশ শেষ -->
+
+<!-- ক্যারোসেল শুরু -->
+{% if active_slides %}
+<div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        {% for slide in active_slides %}
+            <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></button>
+        {% endfor %}
+    </div>
+    <div class="carousel-inner">
+        {% for slide in active_slides %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.title }}">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>{{ slide.title }}</h5>
+                    <p>{{ slide.description }}</p>
+                    {% if slide.button_text and slide.button_url %}
+                        <a href="{{ slide.button_url }}" class="btn btn-light btn-lg">{{ slide.button_text }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">পূর্ববর্তী</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">পরবর্তী</span>
+    </button>
+</div>
+{% endif %}
+<!-- ক্যারোসেল শেষ -->
+
+<!-- সার্ভিস প্যাকেজ সেকশন শুরু -->
+<div class="service-packages py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{{ site_settings.home_service_packages_title }}</h2>
+        <div class="row">
+            {% for package in service_packages %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title text-center">{{ package.name }}</h3>
+                        {% if package.service %}
+                            <h4 class="card-subtitle text-center">{{ package.service.name }}</h4>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title text-center mb-4">{{ package.price }} টাকা</h4>
+                        <ul class="list-unstyled">
+                            {% for feature in package.features.all %}
+                            <li><i class="fas fa-check text-success me-2"></i>{{ feature.description }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{% url 'services:package_detail' package.id %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">কোনো সার্ভিস প্যাকেজ পাওয়া যায়নি।</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- সার্ভিস প্যাকেজ সেকশন শেষ -->
+
+<!-- ফিচার্ড প্যাকেজ সেকশন শুরু -->
+<div class="featured-packages py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{{ site_settings.home_featured_packages_title }}</h2>
+        <div class="row">
+            {% for package in featured_packages %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title text-center">{{ package.service.name }} - {{ package.name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ package.description }}</p>
+                        <h4 class="card-title text-center mb-4">{{ package.price }} টাকা</h4>
+                        <p class="card-text">মেয়াদ: {{ package.duration }}</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        {% if package.service.category and package.service.slug %}
+                            <a href="{% url 'services:service_detail' category_slug=package.service.category.slug service_slug=package.service.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">কোনো ফিচার্ড প্যাকেজ পাওয়া যায়নি।</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- ফিচার্ড প্যাকেজ সেকশন শেষ -->
+
+<!-- পরীক্ষার্থীদের ফিডব্যাক সেকশন শুরু -->
+<div class="testimonials py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{{ site_settings.home_testimonials_title }}</h2>
+        <div class="row">
+            {% for testimonial in testimonials %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="card-text">
+                            <i class="fas fa-quote-left text-primary me-2"></i>
+                            {{ testimonial.content }}
+                            <i class="fas fa-quote-right text-primary ms-2"></i>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ testimonial.user.profile_picture.url }}" alt="{{ testimonial.user.name }}" class="rounded-circle me-3" width="50" height="50">
+                            <div>
+                                <h5 class="mb-0">{{ testimonial.user.name }}</h5>
+                                <small class="text-muted">{{ testimonial.user.designation }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- পরীক্ষার্থীদের ফিডব্যাক সেকশন শেষ -->
+
+{% if cta_section %}
+<div class="cta-section bg-light py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">{{ cta_section.title }}</h2>
+        <p class="lead mb-4">{{ cta_section.description }}</p>
+        <a href="{{ cta_section.button_url }}" class="btn btn-primary btn-lg">{{ cta_section.button_text }}</a>
+    </div>
+</div>
+{% endif %}
+
+<!-- FAQ সেকশন শুরু -->
+<div class="faq-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">{{ site_settings.home_faq_title }}</h2>
+        <div class="accordion" id="faqAccordion">
+            {% for faq in faqs %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                        {{ faq.question }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ faq.answer|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- FAQ সেকশন শেষ -->
+
+{% if request.user.is_authenticated %}
+<div class="dashboard-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">{{ site_settings.home_dashboard_title }}</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ site_settings.home_next_exam_title }}</h3>
+                        {% if next_exam %}
+                            <p class="card-text">{{ next_exam.exam_schedule.exam.name }}</p>
+                            <p class="card-text">ক্যাটাগরি: {{ next_exam.exam_schedule.exam.category.name }}</p>
+                            <p class="card-text">তারিখ: {{ next_exam.exam_schedule.exam_date|date:"F d, Y" }}</p>
+                            <a href="{% url 'exams:exam_detail' next_exam.exam_schedule.exam.id %}" class="btn btn-outline-primary">বিস্তারিত দেখুন</a>
+                        {% else %}
+                            <p class="card-text">কোনো আসন্ন পরীক্ষা নেই</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ site_settings.home_average_score_title }}</h3>
+                        <p class="card-text display-4">{{ average_score|floatformat:2 }}%</p>
+                        <a href="{% url 'exams:performance_analysis' %}" class="btn btn-outline-primary">বিশ্লেষণ দেখুন</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ site_settings.home_latest_result_title }}</h3>
+                        {% if latest_result %}
+                            <p class="card-text">পরীক্ষা: {{ latest_result.registration.exam_schedule.exam.name }}</p>
+                            <p class="card-text">ক্যাটাগরি: {{ latest_result.registration.exam_schedule.exam.category.name }}</p>
+                            <p class="card-text">স্কোর: {{ latest_result.score }}</p>
+                            <p class="card-text">জমা দেওয়ার সময়: {{ latest_result.submitted_at|date:"F d, Y H:i" }}</p>
+                            <a href="{% url 'exams:result_detail' latest_result.id %}" class="btn btn-outline-primary">বিস্তারিত দেখুন</a>
+                        {% else %}
+                            <p class="card-text">আপনি এখনও কোনো পরীক্ষায় অংশগ্রহণ করেননি</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

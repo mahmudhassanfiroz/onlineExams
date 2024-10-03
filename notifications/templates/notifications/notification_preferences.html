@@ -1,0 +1,14 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>নোটিফিকেশন সেটিংস</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">সংরক্ষণ করুন</button>
+</form>
+
+<a href="{% url 'notifications:notification_list' %}">নোটিফিকেশন তালিকায় ফিরে যান</a>
+{% endblock %}

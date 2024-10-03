@@ -1,0 +1,13 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<h2>{% trans "অ্যাকাউন্ট সেটিংস" %}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% trans "সেটিংস আপডেট করুন" %}</button>
+</form>
+{% endblock %}
+

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/book_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">বইয়ের তালিকা</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <form method="get" class="search-form">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="বই বা লেখক খুঁজুন">
+                    <select name="category" class="form-select">
+                        <option value="">সব ক্যাটাগরি</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> খুঁজুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h2 class="text-center mb-4">বৈশিষ্ট্যপূর্ণ বই</h2>
+    <div class="row featured-books">
+        {% for book in featured_books %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 book-card">
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">লেখক: {{ book.author.name }}</p>
+                        <a href="{% url 'books:book_detail' book.id %}" class="btn btn-outline-primary">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="text-center mb-4 mt-5">সকল বই</h2>
+    <div class="row book-list">
+        {% for book in books %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 book-card">
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text">লেখক: {{ book.author.name }}</p>
+                        <p class="card-text">মূল্য: {{ book.price }} টাকা</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{% url 'books:book_detail' book.id %}" class="btn btn-primary btn-sm">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">কোনো বই পাওয়া যায়নি।</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('.book-card').hover(
+            function() {
+                $(this).find('.card-img-top').css('opacity', '0.8');
+            },
+            function() {
+                $(this).find('.card-img-top').css('opacity', '1');
+            }
+        );
+    });
+</script>
+{% endblock %}

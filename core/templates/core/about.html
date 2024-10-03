@@ -1,0 +1,59 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}আমাদের সম্পর্কে - অনলাইন জব পরীক্ষা প্ল্যাটফর্ম{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-4">আমাদের সম্পর্কে</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">আমাদের লক্ষ্য</h2>
+                    <p class="card-text">
+                        আমাদের অনলাইন জব পরীক্ষা প্ল্যাটফর্মের মূল লক্ষ্য হলো বাংলাদেশের যুব সমাজকে চাকরির জন্য প্রস্তুত করা। 
+                        আমরা বিশ্বাস করি যে সঠিক প্রস্তুতি এবং অভ্যাসের মাধ্যমে যে কেউ তার স্বপ্নের চাকরি পেতে পারে।
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">আমাদের পরিচয়</h2>
+                    <p class="card-text">
+                        আমরা একদল উদ্যোগী যুবক, যারা প্রযুক্তির মাধ্যমে শিক্ষা ও কর্মসংস্থানের ক্ষেত্রে পরিবর্তন আনতে চাই। 
+                        আমাদের দলে রয়েছে অভিজ্ঞ শিক্ষাবিদ, প্রোগ্রামার এবং HR বিশেষজ্ঞ, যারা নিরলসভাবে কাজ করছেন এই প্ল্যাটফর্মকে 
+                        উন্নত করতে।
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">আমাদের সেবাসমূহ</h2>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">বিভিন্ন ধরনের অনলাইন পরীক্ষা</li>
+                        <li class="list-group-item">লাইভ মক টেস্ট</li>
+                        <li class="list-group-item">বিষয়ভিত্তিক প্রশ্ন ব্যাংক</li>
+                        <li class="list-group-item">বিস্তারিত ফলাফল বিশ্লেষণ</li>
+                        <li class="list-group-item">ক্যারিয়ার কাউন্সেলিং</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">যোগাযোগ করুন</h2>
+                    <p class="card-text">
+                        আমাদের সেবা সম্পর্কে আরও জানতে বা কোনো প্রশ্ন থাকলে আমাদের সাথে যোগাযোগ করতে দ্বিধা করবেন না।
+                    </p>
+                    <a href="{% url 'contact' %}" class="btn btn-primary">যোগাযোগ করুন</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

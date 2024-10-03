@@ -1,0 +1,44 @@
+
+{% extends 'base.html' %}
+
+{% block title %}কর্মক্ষমতা বিশ্লেষণ{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">কর্মক্ষমতা বিশ্লেষণ</h1>
+
+    <h2 class="mt-5 mb-4">ক্যাটাগরি অনুযায়ী কর্মক্ষমতা</h2>
+    <div class="row">
+        {% for performance in category_performance %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ performance.registration__exam__batch__category__name }}</h5>
+                        <p class="card-text">গড় স্কোর: {{ performance.avg_score|floatformat:2 }}%</p>
+                        <p class="card-text">মোট পরীক্ষা: {{ performance.exam_count }}</p>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="alert alert-info">কোনো কর্মক্ষমতা তথ্য পাওয়া যায়নি।</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="mt-5 mb-4">সামগ্রিক কর্মক্ষমতা</h2>
+    {% for performance in user_performance %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ performance.exam_category.name }}</h5>
+                <p class="card-text">মোট স্কোর: {{ performance.total_score }}</p>
+                <p class="card-text">গড় স্কোর: {{ performance.average_score|floatformat:2 }}%</p>
+                <p class="card-text">সর্বোচ্চ স্কোর: {{ performance.highest_score }}</p>
+                <p class="card-text">সর্বনিম্ন স্কোর: {{ performance.lowest_score }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p class="alert alert-info">কোনো সামগ্রিক কর্মক্ষমতা তথ্য পাওয়া যায়নি।</p>
+    {% endfor %}
+</div>
+{% endblock %}

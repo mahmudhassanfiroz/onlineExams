@@ -1,0 +1,13 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>পেমেন্ট নিশ্চিতকরণ</h1>
+
+<p>আপনার পেমেন্ট সফলভাবে সম্পন্ন হয়েছে।</p>
+<p>লেনদেন আইডি: {{ payment.transaction_id }}</p>
+<p>পরিমাণ: {{ payment.amount }} টাকা</p>
+<p>তারিখ: {{ payment.created_at }}</p>
+
+<a href="{% url 'payments:transaction_history' %}">লেনদেন ইতিহাস দেখুন</a>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/author_posts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ author.get_full_name }} এর পোস্টসমূহ</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h2 class="card-title">
+                                {% if post.slug %}
+                                    <a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a>
+                                {% else %}
+                                    {{ post.title }}
+                                {% endif %}
+                            </h2>
+                            <p class="card-text">{{ post.summary }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    {% if post.slug %}
+                                        <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-sm btn-outline-secondary">বিস্তারিত পড়ুন</a>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">{{ post.created_at|date:"d F, Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% include 'blog/pagination.html' with page=posts %}
+            {% else %}
+                <p>এই লেখকের কোনো পোস্ট পাওয়া যায়নি।</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>লেখক সম্পর্কে</h4>
+                </div>
+                <div class="card-body">
+                    <p>{{ author.bio|default:"কোনো জীবনী নেই।" }}</p>
+                    <p><strong>যোগদানের তারিখ:</strong> {{ author.date_joined|date:"d F, Y" }}</p>
+                    <p><strong>মোট পোস্ট:</strong> {{ posts.count }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>জনপ্রিয় ট্যাগ</h4>
+                </div>
+                <div class="card-body">
+                    {% for tag in popular_tags %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="btn btn-outline-primary btn-sm m-1">
+                            {{ tag.name }} ({{ tag.post_count }})
+                        </a>
+                    {% empty %}
+                        <p>কোনো জনপ্রিয় ট্যাগ নেই।</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/author_posts.js' %}"></script>
+{% endblock %}

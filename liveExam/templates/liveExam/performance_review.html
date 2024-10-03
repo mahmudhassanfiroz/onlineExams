@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>পারফরম্যান্স রিভিউ</h1>
+<h2>{{ exam.title }}</h2>
+{% for answer in user_answers %}
+<div class="question-review {% if answer.is_correct %}correct{% else %}incorrect{% endif %}">
+    <h3>প্রশ্ন {{ forloop.counter }}</h3>
+    <p>{{ answer.question.text }}</p>
+    <p>আপনার উত্তর: {{ answer.selected_option.text }}</p>
+    <p>সঠিক উত্তর: {{ answer.question.correct_option.text }}</p>
+</div>
+{% endfor %}
+{% endblock %}

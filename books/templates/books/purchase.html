@@ -1,0 +1,11 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ book.title }} কিনুন</h1>
+<p>মূল্য: {{ book.price }} টাকা</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">কিনুন</button>
+</form>
+{% endblock %}

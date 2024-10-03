@@ -1,0 +1,29 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>লেনদেন ইতিহাস</h1>
+
+<table>
+    <tr>
+        <th>তারিখ</th>
+        <th>পরিমাণ</th>
+        <th>স্ট্যাটাস</th>
+        <th>লেনদেন আইডি</th>
+        <th>কার্যক্রম</th>
+    </tr>
+    {% for transaction in transactions %}
+    <tr>
+        <td>{{ transaction.created_at }}</td>
+        <td>{{ transaction.amount }} টাকা</td>
+        <td>{{ transaction.get_status_display }}</td>
+        <td>{{ transaction.transaction_id }}</td>
+        <td>
+            {% if transaction.status == 'completed' and not transaction.refund_set.exists %}
+                <a href="{% url 'payments:refund_request' transaction.id %}">ফেরত চান</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

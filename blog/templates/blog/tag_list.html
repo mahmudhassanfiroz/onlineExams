@@ -1,0 +1,53 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tag_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">সকল ট্যাগ</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% if tags %}
+                <div class="tag-cloud">
+                    {% for tag in tags %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="btn btn-outline-primary m-1" style="font-size: {{ tag.font_size }}px;">
+                            {{ tag.name }} ({{ tag.post_count }})
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>কোনো ট্যাগ পাওয়া যায়নি।</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>সর্বাধিক ব্যবহৃত ট্যাগ</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for tag in popular_tags %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'blog:tag_posts' tag.slug %}">{{ tag.name }}</a>
+                                <span class="badge bg-primary rounded-pill">{{ tag.post_count }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">কোনো জনপ্রিয় ট্যাগ নেই।</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tag_list.js' %}"></script>
+{% endblock %}
