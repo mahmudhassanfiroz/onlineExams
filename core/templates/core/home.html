@@ -199,8 +199,8 @@
                             <p class="card-text">{{ next_exam.exam_schedule.exam.name }}</p>
                             <p class="card-text">ক্যাটাগরি: {{ next_exam.exam_schedule.exam.category.name }}</p>
                             <p class="card-text">তারিখ: {{ next_exam.exam_schedule.exam_date|date:"F d, Y" }}</p>
-                            <a href="{% url 'exams:exam_detail' next_exam.exam_schedule.exam.id %}" class="btn btn-outline-primary">বিস্তারিত দেখুন</a>
-                        {% else %}
+                            <a href="{% url 'exams:exam_category_detail' next_exam.exam_schedule.exam.category.id %}" class="btn btn-outline-primary">বিস্তারিত দেখুন</a>
+                            {% else %}
                             <p class="card-text">কোনো আসন্ন পরীক্ষা নেই</p>
                         {% endif %}
                     </div>

@@ -27,9 +27,9 @@
                 {% if site_settings.site_logo %}
                     <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.navbar_title }}" height="30" class="d-inline-block align-top">
                 {% else %}
-                    <img src="{% static 'images/logo.png' %}" alt="জব পরীক্ষা প্ল্যাটফর্ম লোগো" height="30" class="d-inline-block align-top">
+                    <img src="{% static 'images/logo.png' %}" alt="লোগো" height="30" class="d-inline-block align-top">
                 {% endif %}
-                {{ site_settings.navbar_title|default:"জব পরীক্ষা প্ল্যাটফর্ম" }}
+                {% comment %} {{ site_settings.navbar_title|default:"জব পরীক্ষা প্ল্যাটফর্ম" }} {% endcomment %}
             </a>            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
