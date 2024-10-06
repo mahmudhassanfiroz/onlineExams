@@ -1,115 +1,77 @@
 from django.db import models
-from accounts.models import CustomUser
-from services.models import Service, Package
+from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
-
-class ExamCategory(models.Model):
-    name = models.CharField(max_length=100)
-    description = CKEditor5Field()
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-class Batch(models.Model):
-    name = models.CharField(max_length=100)
-    category = models.ForeignKey('ExamCategory', on_delete=models.CASCADE, related_name='batches')
-    start_date = models.DateField()
-    end_date = models.DateField()
-    time = models.TimeField()
-    participants = models.ManyToManyField(CustomUser, related_name='batches', blank=True)
-
-    def __str__(self):
-        return f"{self.name} - {self.category.name}"
+from accounts.models import CustomUser
+from services.models import ExamCategory, Package
+from django.contrib.postgres.fields import JSONField
 
 class Question(models.Model):
     QUESTION_TYPES = (
-        ('MCQ', 'Multiple Choice'),
-        ('TF', 'True/False'),
-        ('SA', 'Short Answer'),
+        ('MCQ', 'বহুনির্বাচনী'),
+        ('TF', 'সত্য/মিথ্যা'),
+        ('SA', 'সংক্ষিপ্ত উত্তর'),
     )
-    category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE)
+    exam_category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE, null=True, blank=True)
     question_text = CKEditor5Field()
     question_type = models.CharField(max_length=3, choices=QUESTION_TYPES)
-    correct_answer = CKEditor5Field(max_length=555)
-    
+    correct_answer = CKEditor5Field()
+    marks = models.FloatField(default=1.0)
+    difficulty_level = models.CharField(max_length=20, choices=[('EASY', 'সহজ'), ('MEDIUM', 'মাঝারি'), ('HARD', 'কঠিন')])
+    tags = models.CharField(max_length=200, blank=True)  # কমা দিয়ে আলাদা করা ট্যাগ
+    options = models.JSONField(blank=True, null=True)  # এখানে পরিবর্তন করা হয়েছে
+
     def __str__(self):
         return self.question_text[:50]
+    def get_options(self):
+           if self.question_type == 'MCQ':
+               return self.options or []
+           elif self.question_type == 'TF':
+               return ['সত্য', 'মিথ্যা']
+           else:
+               return []
 
-class ExamSchedule(models.Model):
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    exam_date = models.DateTimeField(null=True, blank=True)
+class Exam(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, blank=True)
+    exam_category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE)
+    description = CKEditor5Field()
     duration = models.DurationField()
-
-    def __str__(self):
-        return f"Exam for {self.batch} on {self.exam_date}"
-
-class ExamRegistration(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    exam = models.ForeignKey(ExamSchedule, on_delete=models.CASCADE)
-    service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True)
-    registration_date = models.DateTimeField(auto_now_add=True)
-    payment_status = models.BooleanField(default=False)
+    total_marks = models.FloatField()
+    pass_marks = models.FloatField()
+    is_free = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
+    questions = models.ManyToManyField(Question)
+    
     def save(self, *args, **kwargs):
-        if not self.price:
-            if self.package:
-                self.price = self.package.price
-            else:
-                self.price = self.service.price
+        if not self.slug:
+            self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.exam}"
+        return self.title
 
-class ExamResult(models.Model):
-    registration = models.OneToOneField(ExamRegistration, on_delete=models.CASCADE)
-    score = models.IntegerField()
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Result for {self.registration}"
-
-class ExamSettings(models.Model):
-    exam = models.OneToOneField(ExamSchedule, on_delete=models.CASCADE)
-    time_limit = models.DurationField()
-    pass_mark = models.IntegerField()
-    total_questions = models.IntegerField()
-
-    def __str__(self):
-        return f"Settings for {self.exam}"
-
-class UserPerformance(models.Model):
+class UserExam(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    exam_category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE)
-    total_exams = models.IntegerField(default=0)
-    average_score = models.FloatField(default=0.0)
-    last_exam_date = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Performance of {self.user.username} in {self.exam_category}"
-
-class MockExam(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    exam_category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    score = models.IntegerField(null=True, blank=True)
-    questions = models.ManyToManyField(Question)
+    score = models.FloatField(null=True, blank=True)
+    is_completed = models.BooleanField(default=False)
+
+    def calculate_percentage(self):
+        if self.score is not None and self.exam.total_marks > 0:
+            return (self.score / self.exam.total_marks) * 100
+        return 0
 
     def __str__(self):
-        return f"Mock Exam by {self.user.username} for {self.exam_category}"
+        return f"{self.user.username} - {self.exam.title}"
 
 class UserAnswer(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user_exam = models.ForeignKey(UserExam, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    exam_registration = models.ForeignKey(ExamRegistration, on_delete=models.CASCADE)
-    mock_exam = models.ForeignKey(MockExam, on_delete=models.CASCADE, null=True, blank=True)
-    answer_text = CKEditor5Field()
+    answer_text = models.TextField()
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.username}'s answer to {self.question}"
+        return f"{self.user_exam.user.username} - {self.question.question_text[:30]}"
 

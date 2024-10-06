@@ -1,19 +1,19 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-  <h2>নোটিফিকেশন</h2>
-  <ul>
-    {% for notification in notifications %}
-      <li {% if not notification.is_read %}class="unread"{% endif %}>
-        <strong>{{ notification.title }}</strong>
-        <p>{{ notification.message }}</p>
-        <small>{{ notification.created_at|date:"F d, Y H:i" }}</small>
+<h1>আপনার নোটিফিকেশন</h1>
+<ul>
+{% for notification in notifications %}
+    <li>
+        <a href="{% url 'notification_detail' notification.id %}">
+            {{ notification.get_notification_type_display }}: {{ notification.get_stripped_title }}
+        </a>
         {% if not notification.is_read %}
-          <a href="{% url 'notifications:mark_as_read' notification.id %}">পঠিত হিসেবে চিহ্নিত করুন</a>
+            <span class="badge badge-primary">নতুন</span>
         {% endif %}
-      </li>
-    {% empty %}
-      <li>কোনো নোটিফিকেশন নেই।</li>
-    {% endfor %}
-  </ul>
+    </li>
+{% empty %}
+    <li>কোনো নোটিফিকেশন নেই।</li>
+{% endfor %}
+</ul>
 {% endblock %}

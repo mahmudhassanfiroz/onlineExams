@@ -1,90 +1,136 @@
 from django.db import models
-from accounts.models import CustomUser
-from liveExam.models import LiveExam
-from exams.models import ExamRegistration
 from django.utils import timezone
-
+from accounts.models import CustomUser
+from services.models import Package
 from books.models import Book
-from django_ckeditor_5.fields import CKEditor5Field
-class PaymentPlan(models.Model):
-    name = models.CharField(max_length=100)
-    description = CKEditor5Field()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    duration = models.PositiveIntegerField(help_text="Duration in days")
 
-    def __str__(self):
-        return self.name
-
-class Payment(models.Model):
-    ORDER_STATUS_CHOICES = (
-        ('pending', 'অপেক্ষমান'),
-        ('processing', 'প্রক্রিয়াধীন'),
-        ('completed', 'সম্পন্ন'),
-        ('failed', 'ব্যর্থ'),
-        ('cancelled', 'বাতিল'),
-        ('refunded', 'ফেরত দেওয়া হয়েছে')
-    )
-
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)  # এখানে পরিবর্তন করুন
-    exam_registration = models.ForeignKey(ExamRegistration, on_delete=models.CASCADE, null=True, blank=True)
-    order_number = models.CharField(max_length=50, unique=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
-    transaction_id = models.CharField(max_length=100, unique=True)
-    gateway_response = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"অর্ডার {self.order_number} - {self.user.username} - {self.exam_registration.exam.name if self.exam_registration else 'N/A'} - {self.final_amount}"
-
-    def save(self, *args, **kwargs):
-        if not self.order_number:
-            self.order_number = f"ORD-{timezone.now().strftime('%Y%m%d%H%M%S')}-{self.user.id}"
-        if not self.transaction_id:
-            self.transaction_id = f"TXN-{timezone.now().timestamp()}"
-        self.final_amount = self.amount - self.discount_amount
-        super().save(*args, **kwargs)
-
-
-class Refund(models.Model):
-    REFUND_STATUS_CHOICES = (
-        ('pending', 'অপেক্ষমান'),
-        ('approved', 'অনুমোদিত'),
-        ('rejected', 'প্রত্যাখ্যাত'),
-        ('completed', 'সম্পন্ন'),
-    )
-
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
-    reason = models.TextField()
-    status = models.CharField(max_length=20, choices=REFUND_STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.payment.user.username} - {self.payment.amount} - {self.status}"
-
-class DiscountCode(models.Model):
+class Discount(models.Model):
     code = models.CharField(max_length=50, unique=True)
-    discount_percent = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_percentage = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     valid_from = models.DateTimeField()
     valid_to = models.DateTimeField()
-    is_active = models.BooleanField(default=True)
+    max_uses = models.PositiveIntegerField(default=1)
+    current_uses = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.code
 
-class PurchaseHistory(models.Model):
+class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('PENDING', 'অপেক্ষমান'),
+        ('COMPLETED', 'সম্পন্ন'),
+        ('FAILED', 'ব্যর্থ'),
+        ('CANCELLED', 'বাতিল'),
+    ]
+
+    PAYMENT_TYPE_CHOICES = [
+        ('PACKAGE', 'প্যাকেজ'),
+        ('BOOK', 'বই'),
+    ]
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)  # এখানে পরিবর্তন করুন
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True)
-    exam_registration = models.ForeignKey(ExamRegistration, on_delete=models.CASCADE)
-    purchase_date = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_type = models.CharField(max_length=10, choices=PAYMENT_TYPE_CHOICES)
+    status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    transaction_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # SSLCommerz specific fields
+    tran_id = models.CharField(max_length=255, unique=True)
+    val_id = models.CharField(max_length=255, null=True, blank=True)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    card_type = models.CharField(max_length=50, null=True, blank=True)
+    card_no = models.CharField(max_length=50, null=True, blank=True)
+    bank_tran_id = models.CharField(max_length=255, null=True, blank=True)
+    card_issuer = models.CharField(max_length=255, null=True, blank=True)
+    card_brand = models.CharField(max_length=50, null=True, blank=True)
+    risk_level = models.IntegerField(null=True, blank=True)
+    risk_title = models.CharField(max_length=50, null=True, blank=True)
+
+    discount = models.ForeignKey(Discount, on_delete=models.SET_NULL, null=True, blank=True)
+    discounted_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)
+    package = models.ForeignKey(Package, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.exam_registration.exam.name}"
+        return f"{self.user.username} - {self.amount} - {self.get_payment_type_display()}"
+
+    def apply_discount(self, discount):
+        if discount.is_percentage:
+            self.discounted_amount = self.amount - (self.amount * discount.amount / 100)
+        else:
+            self.discounted_amount = max(self.amount - discount.amount, 0)
+        self.discount = discount
+        self.save()
+
+    def save(self, *args, **kwargs):
+        if not self.tran_id:
+            self.tran_id = f"TRAN-{timezone.now().timestamp()}"
+        super().save(*args, **kwargs)
 
 
+
+class Refund(models.Model):
+    REFUND_STATUS_CHOICES = [
+        ('PENDING', 'অপেক্ষমান'),
+        ('APPROVED', 'অনুমোদিত'),
+        ('REJECTED', 'প্রত্যাখ্যাত'),
+        ('COMPLETED', 'সম্পন্ন'),
+    ]
+
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    reason = models.TextField()
+    status = models.CharField(max_length=10, choices=REFUND_STATUS_CHOICES, default='PENDING')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    refunded_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"Refund for {self.payment}"
+
+    def process_refund(self, status, refunded_amount=None):
+        self.status = status
+        self.processed_at = timezone.now()
+        if status == 'COMPLETED':
+            self.refunded_amount = refunded_amount or self.payment.amount
+        self.save()
+
+class PackagePurchase(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    package = models.ForeignKey(Package, on_delete=models.CASCADE)
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    expiry_date = models.DateTimeField()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.package.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.expiry_date:
+            self.expiry_date = timezone.now() + self.package.duration
+        super().save(*args, **kwargs)
+
+class BookPurchase(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title}"
+
+    @classmethod
+    def create_from_payment(cls, payment):
+        return cls.objects.create(
+            user=payment.user,
+            book=payment.book,
+            payment=payment
+        )

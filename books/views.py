@@ -2,17 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.http import HttpResponse, JsonResponse
-
-from accounts.models import CustomUser
-from exams.models import ExamRegistration
-from payments.forms import PaymentForm
-from payments.models import Payment, PurchaseHistory
-from payments.views import process_payment, send_payment_confirmation_email
-from .models import Book, Category, Author, Wishlist
-from .forms import ReviewForm
 from django.contrib import messages
 from django.utils import timezone
 
+from accounts.models import CustomUser
+from payments.models import Payment
+from .models import Book, Category, Author, Wishlist, BookReview
+from .forms import ReviewForm
 
 def book_list(request):
     books = Book.objects.all()
@@ -35,6 +31,7 @@ def book_list(request):
     }
     return render(request, 'books/book_list.html', context)
 
+@login_required
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     reviews = book.book_reviews.all()
@@ -47,6 +44,7 @@ def book_detail(request, book_id):
             review.book = book
             review.user = request.user
             review.save()
+            messages.success(request, 'আপনার রিভিউ সফলভাবে যোগ করা হয়েছে।')
             return redirect('books:book_detail', book_id=book.id)
     else:
         form = ReviewForm()
@@ -59,18 +57,24 @@ def book_detail(request, book_id):
     }
     return render(request, 'books/book_detail.html', context)
 
-
-
 @login_required
 def add_to_wishlist(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     wishlist, created = Wishlist.objects.get_or_create(user=request.user, book=book)
+    if created:
+        messages.success(request, 'বইটি আপনার উইশলিস্টে যোগ করা হয়েছে।')
+    else:
+        messages.info(request, 'বইটি ইতিমধ্যে আপনার উইশলিস্টে আছে।')
     return JsonResponse({'status': 'success'})
 
 @login_required
 def remove_from_wishlist(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    Wishlist.objects.filter(user=request.user, book=book).delete()
+    deleted, _ = Wishlist.objects.filter(user=request.user, book=book).delete()
+    if deleted:
+        messages.success(request, 'বইটি আপনার উইশলিস্ট থেকে সরানো হয়েছে।')
+    else:
+        messages.error(request, 'বইটি আপনার উইশলিস্টে পাওয়া যায়নি।')
     return JsonResponse({'status': 'success'})
 
 @login_required
@@ -95,48 +99,45 @@ def category_detail(request, category_id):
     context = {'category': category, 'books': books}
     return render(request, 'books/category_detail.html', context)
 
-def create_order(user, book):
-    return Payment.objects.create(
-        user=user,
-        book=book,
-        price=book.price,
-        status='pending'
-    )
 
 @login_required
 def purchase_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     
     if book.is_free:
-        PurchaseHistory.objects.create(user=request.user, book=book)
         messages.success(request, 'আপনি সফলভাবে বিনামূল্যে বইটি পেয়েছেন!')
         return redirect('books:download_book', book_id=book.id)
     
-    # পেমেন্ট অবজেক্ট আপডেট করুন বা তৈরি করুন
-    payment, created = Payment.objects.update_or_create(
-        user=request.user,
-        book=book,
-        status='pending',
-        defaults={
-            'amount': book.price,
-            'created_at': timezone.now()  # পেমেন্টের সময় আপডেট করুন
-        }
-    )
-    
-    # পেমেন্ট প্রসেস করার জন্য রিডাইরেক্ট করুন
-    return redirect('payments:process_payment', item_type='book', item_id=book.id)
+    try:
+        payment = Payment.objects.create(
+            user=request.user,
+            amount=book.price,
+            payment_type='BOOK',
+            status='PENDING',
+            tran_id=f"BOOK-{book.id}-{timezone.now().timestamp()}",
+            book=book
+        )
+        
+        return redirect('payments:initiate_payment', item_type='BOOK', item_id=book.id)
+    except Exception as e:
+        messages.error(request, f'পেমেন্ট তৈরি করতে সমস্যা হয়েছে: {str(e)}')
+        return redirect('books:book_detail', book_id=book.id)
+
 
 @login_required
 def download_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    purchase = PurchaseHistory.objects.filter(user=request.user, book=book).first()
+    payment = Payment.objects.filter(user=request.user, book=book, status='COMPLETED').first()
     
-    if purchase or book.is_free:
-        response = HttpResponse(book.pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{book.title}.pdf"'
-        return response
+    if payment or book.is_free:
+        if book.pdf_file:
+            response = HttpResponse(book.pdf_file, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{book.title}.pdf"'
+            return response
+        else:
+            messages.error(request, 'বইয়ের PDF ফাইল পাওয়া যায়নি।')
     else:
         messages.error(request, 'আপনি এই বইটি কিনেন নি।')
-        return redirect('books:book_detail', book_id=book.id)
     
-    
+    return redirect('books:book_detail', book_id=book.id)
+

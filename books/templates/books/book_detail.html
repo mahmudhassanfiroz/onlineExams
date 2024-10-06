@@ -31,15 +31,17 @@
                         {% if user_has_purchased %}
                             <a href="{% url 'books:download_book' book.id %}" class="btn btn-success btn-lg mt-2"><i class="fas fa-download me-2"></i>পিডিএফ ডাউনলোড করুন</a>
                         {% else %}
-                            <a href="{% url 'books:purchase_book' book.id %}" class="btn btn-primary btn-lg mt-2"><i class="fas fa-shopping-cart me-2"></i>কিনুন</a>
+                            <a href="{% url 'payments:initiate_payment' item_type='BOOK' item_id=book.id %}" class="btn btn-primary btn-lg mt-2"><i class="fas fa-shopping-cart me-2"></i>কিনুন</a>
                         {% endif %}
                     {% else %}
-                        <p>বইটি কিনতে <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">লগইন</a> করুন।</p>
+                        <p>বইটি কিনতে <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-outline-primary">লগইন</a> করুন।</p>
                     {% endif %}
                 {% endif %}
             </div>
             {% if user.is_authenticated %}
-                <button id="add-to-wishlist" data-book-id="{{ book.id }}" class="btn btn-outline-primary"><i class="fas fa-heart me-2"></i>উইশলিস্টে যোগ করুন</button>
+                <button id="add-to-wishlist" data-book-id="{{ book.id }}" class="btn btn-outline-primary {% if book in user.wishlist.all %}disabled{% endif %}">
+                    <i class="fas fa-heart me-2"></i>{% if book in user.wishlist.all %}উইশলিস্টে আছে{% else %}উইশলিস্টে যোগ করুন{% endif %}
+                </button>
             {% endif %}
         </div>
     </div>
@@ -109,6 +111,7 @@
     $(document).ready(function() {
         $('#add-to-wishlist').click(function() {
             var bookId = $(this).data('book-id');
+            var button = $(this);
             $.ajax({
                 url: '/books/add-to-wishlist/' + bookId + '/',
                 method: 'POST',
@@ -120,6 +123,7 @@
                             title: 'সফল!',
                             text: 'বইটি উইশলিস্টে যোগ করা হয়েছে।',
                         });
+                        button.addClass('disabled').html('<i class="fas fa-heart me-2"></i>উইশলিস্টে আছে');
                     }
                 }
             });

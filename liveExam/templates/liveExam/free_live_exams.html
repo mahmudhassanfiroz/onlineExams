@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">বিনামূল্যে লাইভ পরীক্ষা</h1>
+    <div class="row">
+        {% for live_exam in live_exams %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ live_exam.title }}</h5>
+                        <p class="card-text">{{ live_exam.description|truncatewords:20 }}</p>
+                        <p class="card-text"><small class="text-muted">তারিখ: {{ live_exam.exam_date }}</small></p>
+                        <p class="card-text"><small class="text-muted">সময়: {{ live_exam.start_time }} - {{ live_exam.end_time }}</small></p>
+                        <a href="{% url 'liveExam:live_exam_detail' live_exam.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>কোনো বিনামূল্যে লাইভ পরীক্ষা পাওয়া যায়নি।</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

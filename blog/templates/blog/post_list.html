@@ -28,26 +28,16 @@
             </div>
 
             <!-- Search Form -->
-            <form method="get" action="{% url 'blog:post_list' %}" class="search-form">
-                <div class="input-group mb-3">
+            <form method="get" action="{% url 'blog:post_list' %}" class="search-form mb-4">
+                <div class="input-group">
                     <input type="text" class="form-control" placeholder="পোস্ট খুঁজুন..." name="search" value="{{ request.GET.search }}">
-                    <button class="btn btn-outline-secondary" type="submit">খুঁজুন</button>
+                    <button class="btn btn-outline-primary" type="submit">খুঁজুন</button>
                 </div>
             </form>
 
-            <!-- Debug Information -->
-            <div class="alert alert-info">
-                <p>মোট পোস্ট: {{ posts.paginator.count }}</p>
-                <p>বর্তমান পৃষ্ঠা: {{ posts.number }}</p>
-                <p>এই পৃষ্ঠায় পোস্ট সংখ্যা: {{ posts.object_list|length }}</p>
-                {% if posts.object_list %}
-                    <p>প্রথম পোস্টের শিরোনাম: {{ posts.object_list.0.title }}</p>
-                {% endif %}
-            </div>
-
-            {% if posts.object_list %}
-                {% for post in posts.object_list %}
-                <div class="card post-card">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="card post-card mb-4">
                     <div class="card-header post-header">
                         <div class="d-flex align-items-center">
                             <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.get_full_name }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
@@ -59,17 +49,13 @@
                     </div>
                     <div class="card-body post-content">
                         <h4 class="card-title">
-                            {% if post.slug %}
                             <a href="{% url 'blog:post_detail' post.slug %}" class="text-decoration-none text-dark">{{ post.title }}</a>
-                            {% else %}
-                            {{ post.title }}
-                            {% endif %}
                         </h4>
                         {% if post.image %}
                         <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="{{ post.title }}">
                         {% endif %}
-                        <p class="card-text">{{ post.content|safe|truncatewords_html:100 }}</p>
-                        {% if post.content|length > 100 %}
+                        <p class="card-text">{{ post.content|safe|truncatewords_html:50 }}</p>
+                        {% if post.content|length > 300 %}
                         <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-link p-0">আরও পড়ুন...</a>
                         {% endif %}
                         <div class="mt-2">
@@ -81,14 +67,17 @@
                     <div class="card-footer post-footer">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <button class="interaction-btn mr-3" data-post-id="{{ post.id }}" data-action="like">
-                                    <i class="far fa-thumbs-up"></i> লাইক ({{ post.likes.count }})
+                                <button class="btn btn-outline-primary btn-sm reaction-btn mr-2" data-post-id="{{ post.id }}" data-reaction-type="like">
+                                    <i class="far fa-thumbs-up"></i> <span class="reaction-count">{{ post.get_reaction_count.like }}</span>
                                 </button>
-                                <a href="{% url 'blog:post_detail' post.slug %}#comments" class="interaction-btn mr-3">
-                                    <i class="far fa-comment"></i> কমেন্ট ({{ post.comments.count }})
+                                <button class="btn btn-outline-primary btn-sm reaction-btn mr-2" data-post-id="{{ post.id }}" data-reaction-type="love">
+                                    <i class="far fa-heart"></i> <span class="reaction-count">{{ post.get_reaction_count.love }}</span>
+                                </button>
+                                <a href="{% url 'blog:post_detail' post.slug %}#comments" class="btn btn-outline-primary btn-sm mr-2">
+                                    <i class="far fa-comment"></i> {{ post.comments.count }}
                                 </a>
-                                <button class="interaction-btn" data-post-id="{{ post.id }}" data-action="share">
-                                    <i class="far fa-share-square"></i> শেয়ার ({{ post.shares }})
+                                <button class="btn btn-outline-primary btn-sm share-btn" data-post-id="{{ post.id }}">
+                                    <i class="far fa-share-square"></i> <span class="share-count">{{ post.shares }}</span>
                                 </button>
                             </div>
                             <div>
@@ -101,7 +90,7 @@
 
                 {% include 'blog/pagination.html' with page=posts %}
             {% else %}
-                <p>কোনো পোস্ট পাওয়া যায়নি।</p>
+                <div class="alert alert-info">কোনো পোস্ট পাওয়া যায়নি।</div>
             {% endif %}
         </main>
 
@@ -111,11 +100,7 @@
             <ul class="list-unstyled">
                 {% for post in recent_posts %}
                 <li class="mb-2">
-                    {% if post.slug %}
                     <a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a>
-                    {% else %}
-                    {{ post.title }}
-                    {% endif %}
                     <small class="text-muted d-block">{{ post.published_at|date:"F d, Y" }}</small>
                 </li>
                 {% endfor %}
@@ -148,53 +133,43 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
-        // লাইক ও শেয়ার ফাংশনালিটি
-        $('.interaction-btn').click(function() {
+        // রিয়েকশন ফাংশনালিটি
+        $('.reaction-btn').click(function() {
             var postId = $(this).data('post-id');
-            var action = $(this).data('action');
+            var reactionType = $(this).data('reaction-type');
             var button = $(this);
 
             $.ajax({
-                url: '{% url "blog:interact_with_post" %}',
+                url: '{% url "blog:react_to_post" 0 %}'.replace('0', postId),
                 type: 'POST',
                 data: {
-                    'post_id': postId,
-                    'action': action,
+                    'reaction_type': reactionType,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(response) {
-                    if (action === 'like') {
-                        button.html('<i class="far fa-thumbs-up"></i> লাইক (' + response.likes + ')');
-                    } else if (action === 'share') {
-                        button.html('<i class="far fa-share-square"></i> শেয়ার (' + response.shares + ')');
+                    button.find('.reaction-count').text(response.reaction_counts[reactionType]);
+                    if (response.action === 'added') {
+                        button.addClass('active');
+                    } else {
+                        button.removeClass('active');
                     }
                 }
             });
         });
 
-        // কমেন্ট ফাংশনালিটি
-        $('.comment-form').submit(function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var postId = form.data('post-id');
-            var content = form.find('textarea[name="content"]').val();
+        // শেয়ার ফাংশনালিটি
+        $('.share-btn').click(function() {
+            var postId = $(this).data('post-id');
+            var button = $(this);
 
             $.ajax({
-                url: '/blog/comment/' + postId + '/',
+                url: '{% url "blog:share_post" 0 %}'.replace('0', postId),
                 type: 'POST',
                 data: {
-                    'content': content,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(response) {
-                    // কমেন্ট যোগ করার পর UI আপডেট করুন
-                    var commentHtml = '<div class="comment">' +
-                                      '<strong>' + response.user + '</strong>: ' +
-                                      response.content +
-                                      '<small class="text-muted"> - ' + response.created_at + '</small>' +
-                                      '</div>';
-                    form.siblings('.comments-list').append(commentHtml);
-                    form.find('textarea').val('');
+                    button.find('.share-count').text(response.shares);
                 }
             });
         });
@@ -214,13 +189,6 @@
             $(this).prev('a').find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
         }).on('hide.bs.collapse', function () {
             $(this).prev('a').find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-        });
-
-        // সার্চ ফর্ম সাবমিশন
-        $('.search-form').submit(function(e) {
-            e.preventDefault();
-            var searchQuery = $(this).find('input[name="search"]').val();
-            window.location.href = "{% url 'blog:post_list' %}?search=" + encodeURIComponent(searchQuery);
         });
     });
 </script>

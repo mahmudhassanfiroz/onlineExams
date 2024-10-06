@@ -5,37 +5,26 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.text import slugify
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 from django.db.models.functions import TruncMonth
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 from accounts.models import CustomUser
 from .models import Post, Tag, Comment, Reaction, Subscription
 from .forms import PostForm, CommentForm, SubscriptionForm
-from django.utils import timezone
-
-nltk.download('punkt')
-nltk.download('stopwords')
 
 def post_list(request, tag_slug=None):
     posts = Post.objects.filter(status='published', published_at__lte=timezone.now()).order_by('-published_at')
     
     search_query = request.GET.get('search')
-    # print(f"Search query: {search_query}")
-    
     if search_query:
         posts = posts.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
-    
-    print(f"Query: {posts.query}")  # SQL query দেখার জন্য
-    # print(f"Total posts before filtering: {posts.count()}")
-    
-    featured_posts = Post.objects.filter(is_featured=True, status='published')[:3]
     
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)
         posts = posts.filter(tags=tag)
+    
+    featured_posts = Post.objects.filter(is_featured=True, status='published')[:3]
     
     # Archive dates
     archive_dates = posts.annotate(month=TruncMonth('published_at')) \
@@ -57,17 +46,9 @@ def post_list(request, tag_slug=None):
 
     archive_dates = [{'year': year, 'months': months} for year, months in archive_data.items()]
     
-    print(f"Posts before pagination: {posts.count()}")
     paginator = Paginator(posts, 10)
     page = request.GET.get('page')
-    try:
-        posts = paginator.page(page)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
-    
-    # print(f"Posts after pagination: {len(posts.object_list)}")
+    posts = paginator.get_page(page)
     
     context = {
         'posts': posts,
@@ -76,9 +57,7 @@ def post_list(request, tag_slug=None):
         'recent_posts': Post.objects.filter(status='published').order_by('-published_at')[:5],
         'archive_dates': archive_dates,
     }
-    # print(f"Context: {context}")
     return render(request, 'blog/post_list.html', context)
-
 
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug, status='published')
@@ -176,9 +155,9 @@ def delete_post(request, slug):
     return render(request, 'blog/delete_post.html', {'post': post})
 
 @login_required
-def react_to_post(request, slug):
+def react_to_post(request, post_id):
     if request.method == 'POST':
-        post = get_object_or_404(Post, slug=slug)
+        post = get_object_or_404(Post, id=post_id)
         user = request.user
         reaction_type = request.POST.get('reaction_type')
         
@@ -201,9 +180,9 @@ def react_to_post(request, slug):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
-def share_post(request, slug):
+def share_post(request, post_id):
     if request.method == 'POST':
-        post = get_object_or_404(Post, slug=slug)
+        post = get_object_or_404(Post, id=post_id)
         post.shares += 1
         post.save()
         return JsonResponse({'shares': post.shares})
@@ -252,35 +231,32 @@ def interact_with_post(request):
     post_id = request.POST.get('post_id')
     action = request.POST.get('action')
     
-    try:
-        post = Post.objects.get(id=post_id)
-        if action == 'like':
-            if request.user in post.likes.all():
-                post.likes.remove(request.user)
-            else:
-                post.likes.add(request.user)
-        elif action == 'share':
-            post.shares += 1
-            post.save()
-        
-        return JsonResponse({
-            'likes': post.total_likes(),
-            'shares': post.shares,
-        })
-    except Post.DoesNotExist:
-        return JsonResponse({'error': 'Post not found'}, status=404)
+    post = get_object_or_404(Post, id=post_id)
+    if action == 'like':
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+    elif action == 'share':
+        post.shares += 1
+        post.save()
+    
+    return JsonResponse({
+        'likes': post.total_likes(),
+        'shares': post.shares,
+    })
 
 @login_required
+@require_POST
 def add_comment(request, post_id):
-    if request.method == 'POST':
-        content = request.POST.get('content')
-        post = get_object_or_404(Post, id=post_id)
-        comment = Comment.objects.create(post=post, user=request.user, content=content)
-        return JsonResponse({
-            'status': 'success',
-            'comment_id': comment.id,
-            'user': comment.user.username,
-            'content': comment.content,
-            'created_at': comment.created_at.strftime('%B %d, %Y %H:%M')
-        })
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    post = get_object_or_404(Post, id=post_id)
+    content = request.POST.get('content')
+    comment = Comment.objects.create(post=post, user=request.user, content=content)
+    return JsonResponse({
+        'status': 'success',
+        'comment_id': comment.id,
+        'user': comment.user.username,
+        'content': comment.content,
+        'created_at': comment.created_at.strftime('%B %d, %Y %H:%M')
+    })
+

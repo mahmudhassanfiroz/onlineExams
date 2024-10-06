@@ -29,7 +29,6 @@
                 {% else %}
                     <img src="{% static 'images/logo.png' %}" alt="লোগো" height="30" class="d-inline-block align-top">
                 {% endif %}
-                {% comment %} {{ site_settings.navbar_title|default:"জব পরীক্ষা প্ল্যাটফর্ম" }} {% endcomment %}
             </a>            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -60,13 +59,19 @@
                 </ul>
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="{% url 'notifications:notification_list' %}" id="notificationLink">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-bell"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationCount">
-                                    {{ unread_notifications_count }}
-                                </span>
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationCount">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% endif %}
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'notifications:notification_list' %}">সব নোটিফিকেশন</a></li>
+                                <li><a class="dropdown-item" href="{% url 'notifications:update_notification_preferences' %}">নোটিফিকেশন সেটিংস</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
@@ -94,7 +99,7 @@
         </div>
     </nav>
 
-    {% show_advertisement 'top' %}
+    {% show_advertisements 'top' %}
 
     <main class="container mt-4">
         {% block content %}
@@ -109,7 +114,7 @@
         {% endblock %}
     </main>
 
-    {% show_advertisement 'bottom' %}
+    {% show_advertisements 'bottom' %}
 
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
@@ -156,11 +161,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'js/ad_loader.js' %}"></script>
+    {% block extra_js %}
+    
+    {% endblock %}
     
     {% if user.is_authenticated %}
     <script>
         const notificationSocket = new WebSocket(
-            'ws://' + window.location.host + '/ws/notifications/'
+            (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + 
+            window.location.host + 
+            '/ws/notifications/'
         );
 
         notificationSocket.onmessage = function(e) {
@@ -173,14 +184,73 @@
         function showNotification(notification) {
             console.log('New notification:', notification);
             toastr.info(notification.message, notification.title);
-                
+            
             // নোটিফিকেশন কাউন্ট আপডেট করুন
             const notificationCount = document.getElementById('notificationCount');
             if (notificationCount) {
-                let count = parseInt(notificationCount.textContent);
-                notificationCount.textContent = count + 1;
+                let count = parseInt(notificationCount.textContent) || 0;
+                count += 1;
+                notificationCount.textContent = count;
                 notificationCount.style.display = 'inline';
             }
+            
+            // নোটিফিকেশন লিস্ট আপডেট করুন (যদি বর্তমান পৃষ্ঠায় থাকে)
+            const notificationList = document.getElementById('notificationList');
+            if (notificationList) {
+                const newNotificationItem = document.createElement('li');
+                newNotificationItem.innerHTML = `
+                    <a href="/notifications/${notification.id}/">
+                        ${notification.title}: ${notification.message}
+                    </a>
+                    <span class="badge badge-primary">নতুন</span>
+                `;
+                notificationList.insertBefore(newNotificationItem, notificationList.firstChild);
+            }
+        }
+
+        function markAsRead(notificationId) {
+            fetch(`/notifications/${notificationId}/mark-as-read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // UI আপডেট করুন
+                    const notificationElement = document.getElementById(`notification-${notificationId}`);
+                    if (notificationElement) {
+                        notificationElement.classList.remove('unread');
+                    }
+                    // নোটিফিকেশন কাউন্ট কমান
+                    const notificationCount = document.getElementById('notificationCount');
+                    if (notificationCount) {
+                        let count = parseInt(notificationCount.textContent);
+                        count = Math.max(0, count - 1);
+                        notificationCount.textContent = count;
+                        if (count === 0) {
+                            notificationCount.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
         // টোস্ট কনফিগারেশন

@@ -12,9 +12,10 @@ urlpatterns = [
     path('delete/<slug:slug>/', views.delete_post, name='delete_post'),
     
     # ইন্টারঅ্যাকশন সম্পর্কিত URL
-    path('react/<slug:slug>/', views.react_to_post, name='react_to_post'),
-    path('share/<slug:slug>/', views.share_post, name='share_post'),
+    path('react/<int:post_id>/', views.react_to_post, name='react_to_post'),
+    path('share/<int:post_id>/', views.share_post, name='share_post'),
     path('subscribe/', views.subscribe, name='subscribe'),
+    path('comment/<int:post_id>/', views.add_comment, name='add_comment'),
     
     # ফিল্টারিং এবং ন্যাভিগেশন সম্পর্কিত URL
     path('tag/<slug:tag_slug>/', views.post_list, name='tag_posts'),
@@ -23,4 +24,7 @@ urlpatterns = [
     
     # অতিরিক্ত পৃষ্ঠা
     path('tags/', views.tag_list, name='tag_list'),
+    
+    # API endpoints
+    path('api/interact/', views.interact_with_post, name='interact_with_post'),
 ]

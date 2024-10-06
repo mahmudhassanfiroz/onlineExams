@@ -1,82 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>আসন্ন এবং চলমান লাইভ পরীক্ষাসমূহ</h1>
-<div class="exam-list">
-    {% for exam in live_exams %}
-        <div class="exam-item" id="exam-{{ exam.id }}">
-            <h2>{{ exam.title }}</h2>
-            <p>তারিখ: {{ exam.exam_date }}</p>
-            <p>শুরুর সময়: {{ exam.start_time }}</p>
-            <p>সময়কাল: {{ exam.duration }}</p>
-            <div id="countdown-{{ exam.id }}"></div>
-            <button id="start-button-{{ exam.id }}" 
-                    onclick="startExam({{ exam.id }})" 
-                    {% if not exam.is_active %}disabled{% endif %}>
-                পরীক্ষা শুরু করুন
-            </button>
+<div class="container mt-5">
+    <h1 class="mb-4">লাইভ পরীক্ষা তালিকা</h1>
+    
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="পরীক্ষা খুঁজুন" value="{{ query }}">
+            <select name="category" class="form-select">
+                <option value="">সব ক্যাটাগরি</option>
+                {% for category in categories %}
+                    <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">খুঁজুন</button>
         </div>
-    {% empty %}
-        <p>কোনো আসন্ন বা চলমান পরীক্ষা নেই।</p>
-    {% endfor %}
-</div>
+    </form>
 
-{% if live_exams.has_other_pages %}
-    <nav>
-        <ul class="pagination">
-            {% if live_exams.has_previous %}
-                <li><a href="?page={{ live_exams.previous_page_number }}">&laquo;</a></li>
-            {% endif %}
-            
-            {% for i in live_exams.paginator.page_range %}
-                {% if live_exams.number == i %}
-                    <li class="active"><span>{{ i }}</span></li>
-                {% else %}
-                    <li><a href="?page={{ i }}">{{ i }}</a></li>
-                {% endif %}
-            {% endfor %}
-            
-            {% if live_exams.has_next %}
-                <li><a href="?page={{ live_exams.next_page_number }}">&raquo;</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-{% endif %}
-
-<script>
-    function updateCountdown() {
-        {% for exam in live_exams %}
-            var examId = {{ exam.id }};
-            var countdownElement = document.getElementById("countdown-" + examId);
-            var startButton = document.getElementById("start-button-" + examId);
-            
-            fetch("{% url 'liveExam:exam_status' exam.id %}")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.has_started) {
-                        if (data.is_ongoing) {
-                            countdownElement.innerHTML = "পরীক্ষা চলছে! শেষ হতে বাকি: " + data.time_remaining;
-                            startButton.disabled = false;
-                            startButton.innerHTML = "পরীক্ষায় যোগ দিন";
-                        } else {
-                            countdownElement.innerHTML = "পরীক্ষা শেষ হয়েছে।";
-                            startButton.disabled = true;
-                            startButton.innerHTML = "পরীক্ষা শেষ";
-                        }
-                    } else {
-                        countdownElement.innerHTML = "পরীক্ষা শুরু হতে বাকি: " + data.time_until_start;
-                        startButton.disabled = true;
-                        startButton.innerHTML = "পরীক্ষা শুরু করুন";
-                    }
-                });
+    <div class="row">
+        {% for live_exam in live_exams %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ live_exam.title }}</h5>
+                        <p class="card-text">{{ live_exam.description|truncatewords:20 }}</p>
+                        <p class="card-text"><small class="text-muted">তারিখ: {{ live_exam.exam_date }}</small></p>
+                        <p class="card-text"><small class="text-muted">সময়: {{ live_exam.start_time }} - {{ live_exam.end_time }}</small></p>
+                        <a href="{% url 'liveExam:live_exam_detail' live_exam.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>কোনো লাইভ পরীক্ষা পাওয়া যায়নি।</p>
+            </div>
         {% endfor %}
-    }
-
-    function startExam(examId) {
-        window.location.href = "/liveExam/exam/" + examId + "/start/";
-    }
-
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-</script>
+    </div>
+</div>
 {% endblock %}

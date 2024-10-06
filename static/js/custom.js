@@ -1,40 +1,46 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Sticky navbar functionality
-    let prevScrollPos = window.pageYOffset;
-    const navbar = document.getElementById("sticky-nav");
-    if (navbar) {
-        const navbarHeight = navbar.offsetHeight;
-        window.addEventListener('scroll', function() {
-            const currentScrollPos = window.pageYOffset;
-            if (prevScrollPos > currentScrollPos) {
-                navbar.style.top = "0";
+function loadAds() {
+    document.querySelectorAll('.ad-placeholder').forEach(placeholder => {
+        try {
+            const adData = JSON.parse(placeholder.dataset.ad);
+            console.log('Ad Data:', adData); // ডিবাগিংয়ের জন্য
+
+            let adContent = '';
+
+            if (adData.type === 'google') {
+                console.log('Loading Google Ad');
+                const script = document.createElement('script');
+                script.innerHTML = adData.content;
+                placeholder.appendChild(script);
             } else {
-                navbar.style.top = `-${navbarHeight}px`;
+                console.log('Loading Custom Ad');
+                if (adData.image_url) {
+                    adContent = `<a href="${adData.url || '#'}" target="_blank"><img src="${adData.image_url}" alt="${adData.title || 'Advertisement'}" class="img-fluid"></a>`;
+                } else if (adData.url) {
+                    adContent = `<a href="${adData.url}" target="_blank">${adData.title || 'Advertisement'}</a>`;
+                } else {
+                    adContent = adData.content || 'No content available';
+                }
+                placeholder.innerHTML = adContent;
             }
-            prevScrollPos = currentScrollPos;
-        });
-    }
 
-    // Bootstrap dropdowns
-    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
-    dropdownElementList.forEach(function (dropdownToggleEl) {
-        new bootstrap.Dropdown(dropdownToggleEl)
-    });
-
-    // Custom submenu functionality
-    var dropdownSubmenus = [].slice.call(document.querySelectorAll('.dropdown-submenu > a'));
-    dropdownSubmenus.forEach(function(element){
-        element.addEventListener('click', function(e){
-            e.preventDefault();
-            e.stopPropagation();
-            var submenu = this.nextElementSibling;
-            if(submenu && submenu.classList.contains('show')){
-                submenu.classList.remove('show');
-            } else {
-                if(submenu) submenu.classList.add('show');
+            // Remove loader and show ad
+            const loader = placeholder.querySelector('.ad-loader');
+            if (loader) {
+                loader.remove();
             }
-        });
-    });
+            
+            placeholder.style.opacity = '0';
+            setTimeout(() => {
+                placeholder.style.transition = 'opacity 0.5s';
+                placeholder.style.opacity = '1';
+            }, Math.random() * 1000); // Random delay for more realistic loading
 
-    console.log('Custom JS loaded and executed');
-});
+        } catch (error) {
+            console.error('Error loading ad:', error);
+            placeholder.innerHTML = 'Error loading advertisement';
+        }
+    });
+}
+
+// DOMContentLoaded ইভেন্ট ব্যবহার করুন
+document.addEventListener('DOMContentLoaded', loadAds);

@@ -1,15 +1,27 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>পেমেন্ট প্রক্রিয়া</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">পেমেন্ট প্রক্রিয়া</h1>
 
-<h2>{{ plan.name }}</h2>
-<p>মূল্য: {{ plan.price }} টাকা</p>
+    {% if payment %}
+        {% if payment.payment_type == 'BOOK' %}
+            <h2>{{ payment.book.title }}</h2>
+        {% elif payment.payment_type == 'PACKAGE' %}
+            <h2>{{ payment.package.name }}</h2>
+        {% endif %}
+        <p>মূল্য: {{ payment.amount }} টাকা</p>
 
-<form action="{% url 'payments:process_payment' registration_id=registration.id %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">পেমেন্ট করুন</button>
-</form>
+        {% if payment.discounted_amount %}
+            <p>ডিসকাউন্টের পর মূল্য: {{ payment.discounted_amount }} টাকা</p>
+        {% endif %}
+
+        <form action="{% url 'payments:initiate_payment' item_type=payment.payment_type item_id=payment.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">পেমেন্ট করুন</button>
+        </form>
+    {% else %}
+        <p>কোনো পেমেন্ট তথ্য পাওয়া যায়নি।</p>
+    {% endif %}
+</div>
 {% endblock %}

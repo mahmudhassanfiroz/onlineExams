@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">প্যাকেজ খুঁজুন</h1>
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="প্যাকেজের নাম লিখুন" value="{{ query }}">
+            <button type="submit" class="btn btn-primary">খুঁজুন</button>
+        </div>
+    </form>
+    <div class="row">
+        {% for package in packages %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ package.name }}</h5>
+                        <p class="card-text">{{ package.description|safe|truncatewords_html:30 }}</p>
+                        <p class="card-text"><strong>মূল্য:</strong> {{ package.price }} টাকা</p>
+                        <p class="card-text"><strong>মেয়াদ:</strong> {{ package.duration }}</p>
+                        <a href="{% url 'package_detail' package.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>কোনো প্যাকেজ পাওয়া যায়নি।</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,11 +1,43 @@
-
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>{{ book.title }} কিনুন</h1>
-<p>মূল্য: {{ book.price }} টাকা</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">কিনুন</button>
-</form>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">{{ book.title }} কিনুন</h1>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-8">
+                            <p><strong>লেখক:</strong> {{ book.author.name }}</p>
+                            <p><strong>প্রকাশক:</strong> {{ book.publisher }}</p>
+                            <p><strong>ক্যাটাগরি:</strong> {{ book.category.name }}</p>
+                            <h3 class="text-primary">মূল্য: {{ book.price }} টাকা</h3>
+                        </div>
+                    </div>
+                    <form action="{% url 'payments:initiate_payment' item_type='BOOK' item_id=book.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-cart me-2"></i>কিনুন
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/purchase.js' %}"></script>
 {% endblock %}

@@ -33,11 +33,14 @@
                 </div>
 
                 <div class="post-actions mt-4">
-                    <button id="like-button" class="btn btn-outline-primary {% if user_liked %}liked{% endif %}" data-slug="{{ post.slug }}">
-                        <i class="fas fa-thumbs-up"></i> <span id="like-count">{{ post.likes.count }}</span> লাইক
+                    <button class="btn btn-outline-primary reaction-btn {% if user_reactions.like %}active{% endif %}" data-reaction-type="like" data-post-id="{{ post.id }}">
+                        <i class="fas fa-thumbs-up"></i> <span class="reaction-count">{{ post.get_reaction_count.like }}</span>
+                    </button>
+                    <button class="btn btn-outline-danger reaction-btn {% if user_reactions.love %}active{% endif %}" data-reaction-type="love" data-post-id="{{ post.id }}">
+                        <i class="fas fa-heart"></i> <span class="reaction-count">{{ post.get_reaction_count.love }}</span>
                     </button>
                     <button id="share-button" class="btn btn-outline-info ms-2">
-                        <i class="fas fa-share-alt"></i> শেয়ার
+                        <i class="fas fa-share-alt"></i> শেয়ার (<span id="share-count">{{ post.shares }}</span>)
                     </button>
                 </div>
 
@@ -49,18 +52,14 @@
             </article>
 
             <section class="comments mt-5">
-                <h3><i class="fas fa-comments"></i> মন্তব্য ({{ comments.count }})</h3>
-                {% for comment in comments %}
-                    <div class="comment card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ comment.user.get_full_name }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ comment.created_at|date:"F d, Y H:i" }}</h6>
-                            <p class="card-text">{{ comment.content }}</p>
-                        </div>
-                    </div>
-                {% empty %}
-                    <p>কোনো মন্তব্য নেই।</p>
-                {% endfor %}
+                <h3><i class="fas fa-comments"></i> মন্তব্য (<span id="comment-count">{{ comments.count }}</span>)</h3>
+                <div id="comments-container">
+                    {% for comment in comments %}
+                        {% include 'blog/comment.html' with comment=comment %}
+                    {% empty %}
+                        <p id="no-comments">কোনো মন্তব্য নেই।</p>
+                    {% endfor %}
+                </div>
 
                 {% if user.is_authenticated %}
                     <h4 class="mt-4"><i class="fas fa-pen"></i> মন্তব্য করুন</h4>
@@ -107,21 +106,24 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
-        $('#like-button').click(function() {
-            var slug = $(this).data('slug');
+        $('.reaction-btn').click(function() {
+            var postId = $(this).data('post-id');
+            var reactionType = $(this).data('reaction-type');
+            var button = $(this);
+
             $.ajax({
-                url: '{% url "blog:react_to_post" post.slug %}',
+                url: '{% url "blog:react_to_post" post.id %}',
                 method: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'reaction_type': 'like'
+                    'reaction_type': reactionType
                 },
                 success: function(response) {
-                    $('#like-count').text(response.reaction_counts.like);
+                    button.find('.reaction-count').text(response.reaction_counts[reactionType]);
                     if (response.action === 'added') {
-                        $('#like-button').addClass('liked');
+                        button.addClass('active');
                     } else {
-                        $('#like-button').removeClass('liked');
+                        button.removeClass('active');
                     }
                 }
             });
@@ -129,6 +131,16 @@
 
         $('#share-button').click(function() {
             $('.social-share').toggle();
+            $.ajax({
+                url: '{% url "blog:share_post" post.id %}',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $('#share-count').text(response.shares);
+                }
+            });
         });
 
         $('#comment-form').submit(function(e) {
@@ -138,7 +150,10 @@
                 method: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {
-                    location.reload();
+                    $('#no-comments').remove();
+                    $('#comments-container').prepend(response.comment_html);
+                    $('#comment-count').text(response.comment_count);
+                    $('#comment-form')[0].reset();
                 },
                 error: function(xhr, status, error) {
                     alert('মন্তব্য পোস্ট করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');

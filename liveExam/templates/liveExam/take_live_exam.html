@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ live_exam.title }}</h1>
+    <div class="alert alert-info">
+        <p><strong>সময়সীমা:</strong> <span id="time-left"></span></p>
+        <p><strong>মোট প্রশ্ন:</strong> {{ questions.count }}</p>
+    </div>
+    <form method="post" id="exam-form">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">প্রশ্ন {{ forloop.counter }}: {{ question.text }}</h5>
+                    {% for option in question.get_options %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="option_{{ question.id }}_{{ forloop.counter }}" value="{{ option }}">
+                            <label class="form-check-label" for="option_{{ question.id }}_{{ forloop.counter }}">
+                                {{ option }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary" id="submit-btn">পরীক্ষা জমা দিন</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var duration = {{ live_exam.duration.total_seconds }};
+        var timeLeft = duration;
+        var timerElement = document.getElementById('time-left');
+        var form = document.getElementById('exam-form');
+        var submitBtn = document.getElementById('submit-btn');
+
+        function updateTimer() {
+            var hours = Math.floor(timeLeft / 3600);
+            var minutes = Math.floor((timeLeft % 3600) / 60);
+            var seconds = timeLeft % 60;
+
+            timerElement.textContent = 
+                (hours < 10 ? "0" + hours : hours) + ":" +
+                (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                (seconds < 10 ? "0" + seconds : seconds);
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                submitExam();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function submitExam() {
+            submitBtn.disabled = true;
+            form.submit();
+        }
+
+        var timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            submitExam();
+        });
+
+        form.addEventListener('submit', function(e) {
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

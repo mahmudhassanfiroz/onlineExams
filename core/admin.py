@@ -1,4 +1,3 @@
-import json
 from django.contrib import admin
 from django import forms
 from .models import CTASection, CarouselSlide, FooterContent, MarqueeNotice, MenuItem, SiteSettings, AboutPage, AboutSection, AboutButton, ContactPage, ContactAdditionalInfo, Advertisement, QuickLink
@@ -20,22 +19,12 @@ class CTASectionAdmin(admin.ModelAdmin):
     list_display = ('title', 'button_text', 'is_active')
     list_editable = ('is_active',)
 
-class FooterContentAdminForm(forms.ModelForm):
-    def clean_quick_links(self):
-        quick_links = self.cleaned_data.get('quick_links')
-        try:
-            json.loads(quick_links)
-        except json.JSONDecodeError:
-            raise forms.ValidationError("অবৈধ JSON ফরম্যাট। অনুগ্রহ করে একটি বৈধ JSON অ্যারে লিখুন।")
-        return quick_links
-
 class QuickLinkInline(admin.TabularInline):
     model = QuickLink
     extra = 1
 
 @admin.register(FooterContent)
 class FooterContentAdmin(admin.ModelAdmin):
-    form = FooterContentAdminForm
     inlines = [QuickLinkInline]
     fieldsets = (
         ('যোগাযোগের তথ্য', {
@@ -53,7 +42,6 @@ class FooterContentAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
-        # শুধুমাত্র একটি ইনস্ট্যান্স অনুমোদন করুন
         return not FooterContent.objects.exists()
 
 @admin.register(QuickLink)
@@ -91,7 +79,6 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
-        # শুধুমাত্র একটি ইনস্ট্যান্স অনুমোদন করুন
         return not SiteSettings.objects.exists()
 
 class AboutSectionInline(admin.StackedInline):
@@ -119,7 +106,33 @@ class ContactPageAdmin(admin.ModelAdmin):
 
 @admin.register(Advertisement)
 class AdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'position', 'is_active')
-    list_filter = ('is_active', 'position')
+    list_display = ('title', 'ad_type', 'position', 'is_active')
+    list_filter = ('is_active', 'position', 'ad_type')
     search_fields = ('title', 'content')
+    fieldsets = (
+        ('বিজ্ঞাপনের তথ্য', {
+            'fields': ('title', 'ad_type', 'position', 'is_active')
+        }),
+        ('কাস্টম বিজ্ঞাপন', {
+            'fields': ('content', 'image', 'url'),
+            'classes': ('custom-ad',),
+        }),
+        ('Google বিজ্ঞাপন', {
+            'fields': ('google_ad_code',),
+            'classes': ('google-ad',),
+        }),
+    )
 
+    class Media:
+        js = ('js/advertisement_admin.js',)
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == "position":
+            kwargs['choices'] = (
+                ('top', 'শীর্ষে'),
+                ('bottom', 'নীচে'),
+                ('sidebar', 'সাইডবারে'),
+            )
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+    
+    

@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from accounts.models import CustomUser
-from liveExam.models import LiveExam, Batch 
+from liveExam.models import LiveExam
 from django_ckeditor_5.fields import CKEditor5Field
 
 class UserProfile(models.Model):
@@ -82,5 +82,5 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"{self.user.name} - {self.message[:50]}..."
-    
+   
     

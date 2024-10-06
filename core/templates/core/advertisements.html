@@ -1,0 +1,37 @@
+
+{% load static %}
+
+<div class="advertisements-container">
+    {% for ad in advertisements %}
+        <div class="ad-placeholder" data-ad='{{ ad.get_ad_json|escapejs }}'>
+            <div class="ad-loader"></div>
+        </div>
+    {% endfor %}
+</div>
+
+<script src="{% static 'js/ad_loader.js' %}"></script>
+
+<style>
+    .ad-placeholder {
+        min-height: 100px;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        overflow: hidden;
+        position: relative;
+    }
+    .ad-loader {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #333;
+        border-radius: 50%;
+        border-top: 3px solid #fff;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>

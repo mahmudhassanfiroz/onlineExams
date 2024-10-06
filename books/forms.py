@@ -1,11 +1,7 @@
-
 from django import forms
-
-from services.models import Review
-# from .models import Review
+from .models import BookReview
 
 class ReviewForm(forms.ModelForm):
     class Meta:
-        model = Review
+        model = BookReview
         fields = ['rating', 'comment']
-

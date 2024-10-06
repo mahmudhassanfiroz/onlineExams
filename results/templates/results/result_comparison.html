@@ -1,21 +1,69 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>ফলাফল তুলনা</h1>
-<img src="data:image/png;base64,{{ graphic }}" alt="Score Progression">
-<table>
-    <tr>
-        <th>পরীক্ষা</th>
-        <th>তারিখ</th>
-        <th>স্কোর</th>
-    </tr>
-    {% for result in results %}
-    <tr>
-        <td>{{ result.exam.title }}</td>
-        <td>{{ result.submission_time }}</td>
-        <td>{{ result.score }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="container mt-5">
+    <h1 class="mb-4">ফলাফল তুলনা</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <canvas id="scoreChart"></canvas>
+        </div>
+        <div class="col-md-4">
+            <h3>সর্বশেষ ফলাফলসমূহ</h3>
+            <ul class="list-group">
+                {% for result in results|slice:":5" %}
+                <li class="list-group-item">
+                    <strong>{{ result.content_object.exam.title }}</strong><br>
+                    স্কোর: {{ result.score }}<br>
+                    তারিখ: {{ result.submission_time|date:"F d, Y" }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('scoreChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for result in results %}'{{ result.submission_time|date:"F d, Y" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'স্কোর',
+                    data: [{% for result in results %}{{ result.score }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'স্কোর'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'পরীক্ষার তারিখ'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'স্কোর প্রগতি'
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

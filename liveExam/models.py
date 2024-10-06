@@ -1,40 +1,34 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import CustomUser
-# from django_ckeditor_5.fields import CKEditor5Field
+from services.models import ExamCategory
+from exams.models import Question
+from django.utils.text import slugify
 
 class LiveExam(models.Model):
     title = models.CharField(max_length=200)
-    batch = models.ForeignKey('Batch', on_delete=models.CASCADE)
-    exam_date = models.DateField(auto_now_add=True)
-    start_time = models.TimeField()  # পরীক্ষা শুরুর সময়
+    slug = models.SlugField(unique=True, blank=True)
+    exam_category = models.ForeignKey(ExamCategory, on_delete=models.CASCADE, null=True)
+    description = models.TextField()
+    exam_date = models.DateField()
+    start_time = models.TimeField()
     duration = models.DurationField()
+    total_marks = models.FloatField()
+    pass_marks = models.FloatField()
+    questions = models.ManyToManyField(Question)
+    is_free = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    def is_today(self):
-        return self.exam_date == timezone.now().date()
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def is_active(self):
         now = timezone.now()
         exam_start = timezone.make_aware(timezone.datetime.combine(self.exam_date, self.start_time))
         exam_end = exam_start + self.duration
         return exam_start <= now < exam_end
-
-    def time_until_start(self):
-        now = timezone.now()
-        exam_start = timezone.make_aware(timezone.datetime.combine(self.exam_date, self.start_time))
-        if now < exam_start:
-            return exam_start - now
-        return timezone.timedelta()
-
-    def has_started(self):
-        now = timezone.now()
-        exam_start = timezone.make_aware(timezone.datetime.combine(self.exam_date, self.start_time))
-        return now >= exam_start
-
-    def is_upcoming(self):
-        now = timezone.now()
-        exam_start = timezone.make_aware(timezone.datetime.combine(self.exam_date, self.start_time))
-        return now < exam_start <= (now + timezone.timedelta(days=1))
 
     def status(self):
         now = timezone.now()
@@ -48,36 +42,31 @@ class LiveExam(models.Model):
         else:
             return "সমাপ্ত"
 
-class Batch(models.Model):
-    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.title
 
-class ExamSession(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='exam_sessions')
-    exam = models.ForeignKey('LiveExam', on_delete=models.CASCADE, related_name='sessions')
-    start_time = models.DateTimeField(default=timezone.now)
+class UserLiveExam(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    live_exam = models.ForeignKey(LiveExam, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    is_completed = models.BooleanField(default=False)
     score = models.FloatField(null=True, blank=True)
-    correct_answers = models.IntegerField(default=0)
-    total_marks = models.FloatField(default=0)
+    is_completed = models.BooleanField(default=False)
+
+    def calculate_percentage(self):
+        if self.score is not None and self.live_exam.total_marks > 0:
+            return (self.score / self.live_exam.total_marks) * 100
+        return 0
 
     def __str__(self):
-        return f"{self.user.username} - {self.exam.title} - {self.start_time}"
+        return f"{self.user.username} - {self.live_exam.title}"
 
-    def duration(self):
-        if self.end_time:
-            return self.end_time - self.start_time
-        return None
+class LiveExamAnswer(models.Model):
+    user_live_exam = models.ForeignKey(UserLiveExam, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer_text = models.TextField()
+    is_correct = models.BooleanField(default=False)
 
-    def is_time_up(self):
-        return timezone.now() > (self.start_time + self.exam.duration)
-
-    def remaining_time(self):
-        if not self.is_completed and not self.is_time_up():
-            return (self.start_time + self.exam.duration) - timezone.now()
-        return timezone.timedelta()
-
-    class Meta:
-        unique_together = ['user', 'exam']
-        ordering = ['-start_time']
+    def __str__(self):
+        return f"{self.user_live_exam.user.username}'s answer to {self.question}"
 

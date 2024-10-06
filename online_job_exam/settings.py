@@ -22,6 +22,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    'django.contrib.postgres',
+
+    
     'core',
     'accounts',
     'exams',
@@ -105,12 +108,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -136,10 +139,13 @@ SSLCZ_STORE_ID = 'jobex66fbaab76bdee'
 SSLCZ_STORE_PASSWORD = 'jobex66fbaab76bdee@ssl'
 SSLCZ_PAYMENT_URL = 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'
 SSLCZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php'
-SSLCZ_SUCCESS_URL = 'https://7406-45-124-171-177.ngrok-free.app/payment_success/'
-SSLCZ_FAIL_URL = 'https://7406-45-124-171-177.ngrok-free.app/payment_failed/'
-SSLCZ_CANCEL_URL = 'https://7406-45-124-171-177.ngrok-free.app/payment_canceled/'
-SSLCZ_IPNURL = 'https://7406-45-124-171-177.ngrok-free.app/payment_ipn/'
+SSLCZ_SUCCESS_URL = '/payments/success/'
+SSLCZ_FAIL_URL = '/payments/failed/'
+SSLCZ_CANCEL_URL = '/payments/canceled/'
+SSLCZ_IPNURL = '/payments/ipn/'
+SSLCZ_ALLOW_HOSTS = ['sandbox.sslcommerz.com', 'securepay.sslcommerz.com']
+SSLCZ_IS_SANDBOX = True
+
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -161,11 +167,16 @@ CSRF_TRUSTED_ORIGINS = ['https://7406-45-124-171-177.ngrok-free.app']
 # Channels কনফিগারেশন
 ASGI_APPLICATION = "online_job_exam.asgi.application"
 
+
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
+
 # JAZZMIN SETTINGS
 JAZZMIN_SETTINGS = {
     "site_brand": "JobEx",
@@ -255,6 +266,40 @@ TINYMCE_DEFAULT_CONFIG = {
 #
 import dj_database_url
 
-DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
+# DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
 
+# সিকিউরিটি সেটিংস
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
+# CSRF সেটিংস
+CSRF_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
+SESSION_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
+
+# ক্যাশিং কনফিগারেশন (অপশনাল)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# লগিং কনফিগারেশন (অপশনাল)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

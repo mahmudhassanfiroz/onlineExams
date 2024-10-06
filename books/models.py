@@ -34,6 +34,9 @@ class Book(models.Model):
     is_free = models.BooleanField(default=False)
     reviews = models.ManyToManyField(CustomUser, through='BookReview', related_name='reviewed_books')
     is_featured = models.BooleanField(default=False)
+    
+    def get_price(self):
+        return self.price
 
     def __str__(self):
         return self.title

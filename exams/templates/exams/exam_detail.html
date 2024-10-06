@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ exam.title }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="card-text">{{ exam.description }}</p>
+            <p class="card-text"><strong>প্রশ্ন সংখ্যা:</strong> {{ exam.questions.count }}</p>
+            <p class="card-text"><strong>সময়সীমা:</strong> {{ exam.duration }} মিনিট</p>
+            <p class="card-text"><strong>ক্যাটাগরি:</strong> {{ exam.exam_category.name }}</p>
+            {% if exam.is_free %}
+                <p class="card-text"><span class="badge bg-success">বিনামূল্যে</span></p>
+            {% endif %}
+            {% if can_take_exam %}
+                <a href="{% url 'exams:take_exam' exam.slug %}" class="btn btn-primary">পরীক্ষা দিন</a>
+            {% else %}
+                <p class="text-danger">এই পরীক্ষা দেওয়ার জন্য আপনাকে প্যাকেজ কিনতে হবে।</p>
+                <a href="{% url 'package_list' %}" class="btn btn-primary">প্যাকেজ দেখুন</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -16,27 +16,38 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">আপনি কি নিশ্চিত যে আপনি এই পোস্টটি মুছে ফেলতে চান?</p>
-                    <p class="text-muted">এই কাজটি অপরিবর্তনীয়। একবার মুছে ফেললে, আপনি আর এই পোস্টটি ফিরিয়ে আনতে পারবেন না।</p>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> সতর্কতা: এই কাজটি অপরিবর্তনীয়। একবার মুছে ফেললে, আপনি আর এই পোস্টটি ফিরিয়ে আনতে পারবেন না।
+                    </div>
                     
                     <div class="post-info mt-3">
-                        <p><strong>লেখক:</strong> {{ post.author.get_full_name }}</p>
-                        <p><strong>প্রকাশের তারিখ:</strong> {{ post.published_at|date:"F d, Y" }}</p>
-                        <p><strong>ট্যাগ:</strong> 
+                        <p><strong><i class="fas fa-user"></i> লেখক:</strong> {{ post.author.get_full_name }}</p>
+                        <p><strong><i class="fas fa-calendar-alt"></i> প্রকাশের তারিখ:</strong> {{ post.published_at|date:"F d, Y" }}</p>
+                        <p><strong><i class="fas fa-tags"></i> ট্যাগ:</strong> 
                             {% for tag in post.tags.all %}
                                 <span class="badge bg-secondary">{{ tag.name }}</span>
                             {% empty %}
                                 <span class="text-muted">কোনো ট্যাগ নেই</span>
                             {% endfor %}
                         </p>
+                        <p><strong><i class="fas fa-eye"></i> ভিউ:</strong> {{ post.views }}</p>
+                        <p><strong><i class="fas fa-thumbs-up"></i> লাইক:</strong> {{ post.likes.count }}</p>
+                        <p><strong><i class="fas fa-comments"></i> মন্তব্য:</strong> {{ post.comments.count }}</p>
                     </div>
                     
                     <form method="post" id="delete-form">
                         {% csrf_token %}
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirm-delete" required>
+                            <label class="form-check-label" for="confirm-delete">
+                                আমি নিশ্চিত যে আমি এই পোস্টটি মুছে ফেলতে চাই।
+                            </label>
+                        </div>
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> ফিরে যান
                             </a>
-                            <button type="submit" class="btn btn-danger" id="delete-btn">
+                            <button type="submit" class="btn btn-danger" id="delete-btn" disabled>
                                 <i class="fas fa-trash-alt"></i> হ্যাঁ, মুছে ফেলুন
                             </button>
                         </div>
@@ -51,14 +62,16 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
+        $('#confirm-delete').change(function() {
+            $('#delete-btn').prop('disabled', !this.checked);
+        });
+
         $('#delete-form').submit(function(e) {
             e.preventDefault();
-            if (confirm('আপনি কি সত্যিই এই পোস্টটি মুছে ফেলতে চান?')) {
-                $('#delete-btn').prop('disabled', true).html(
-                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> মুছে ফেলা হচ্ছে...'
-                );
-                this.submit();
-            }
+            $('#delete-btn').prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> মুছে ফেলা হচ্ছে...'
+            );
+            this.submit();
         });
     });
 </script>

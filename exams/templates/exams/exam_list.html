@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">পরীক্ষা তালিকা</h1>
+    
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="পরীক্ষা খুঁজুন" value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">সব ক্যাটাগরি</option>
+                    {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="difficulty" class="form-select">
+                    <option value="">সব ধরনের কঠিনতা</option>
+                    <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>সহজ</option>
+                    <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>মাঝারি</option>
+                    <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>কঠিন</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">খুঁজুন</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        {% for exam in exams %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ exam.title }}</h5>
+                        <p class="card-text">{{ exam.description|truncatewords:20 }}</p>
+                        <p class="card-text"><small class="text-muted">প্রশ্ন সংখ্যা: {{ exam.questions.count }}</small></p>
+                        <p class="card-text"><small class="text-muted">সময়সীমা: {{ exam.duration }} মিনিট</small></p>
+                        {% if exam.is_free %}
+                            <span class="badge bg-success">বিনামূল্যে</span>
+                        {% endif %}
+                        <a href="{% url 'exams:exam_detail' exam.slug %}" class="btn btn-primary mt-2">বিস্তারিত দেখুন</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>কোনো পরীক্ষা পাওয়া যায়নি।</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

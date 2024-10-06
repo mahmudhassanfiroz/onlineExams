@@ -173,12 +173,39 @@ body {
     margin-top: -1px;
 }
 
-#notificationLink .fa-bell {
-    font-size: 1.2rem;
-    color: #ffffff;
+#notificationCount {
+    font-size: 0.4rem;  /* আকার আরও ছোট করা হয়েছে */
+    width: 0.65rem;     /* প্রস্থ কমানো হয়েছে */
+    height: 0.65rem;    /* উচ্চতা কমানো হয়েছে */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0;
+    position: absolute;
+    top: 0.15rem;       
+    right: -0.2rem;     
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    line-height: 1;     
 }
 
-#notificationCount {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.4rem;
+#notificationLink {
+    position: relative;
+    display: inline-block;
+}
+
+.fa-bell {
+    font-size: 1.2rem;
+}
+
+.ad-placeholder {
+    min-height: 100px;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    overflow: hidden;
 }

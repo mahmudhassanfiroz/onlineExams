@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/edit_post.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -20,17 +21,23 @@
                         {{ form|crispy }}
                         <div class="mb-3">
                             <label for="id_tags" class="form-label">ট্যাগ</label>
-                            <select multiple class="form-select" id="id_tags" name="tags">
+                            <select multiple class="form-select select2" id="id_tags" name="tags">
                                 {% for tag in form.fields.tags.queryset %}
                                     <option value="{{ tag.id }}" {% if tag in form.instance.tags.all %}selected{% endif %}>{{ tag.name }}</option>
                                 {% endfor %}
                             </select>
-                            <small class="form-text text-muted">একাধিক ট্যাগ নির্বাচন করতে Ctrl বা Cmd কী চেপে ধরে রাখুন।</small>
+                            <small class="form-text text-muted">একাধিক ট্যাগ নির্বাচন করতে পারেন।</small>
                         </div>
                         {% if post.image %}
                         <div class="mb-3">
                             <label class="form-label">বর্তমান ছবি</label>
                             <img src="{{ post.image.url }}" alt="Current Image" class="img-fluid mb-2" id="current-image">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remove_image" name="remove_image">
+                                <label class="form-check-label" for="remove_image">
+                                    বর্তমান ছবি মুছুন
+                                </label>
+                            </div>
                         </div>
                         {% endif %}
                         <div class="mb-3">
@@ -55,9 +62,16 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{% static 'js/edit_post.js' %}"></script>
 <script>
     $(document).ready(function() {
+        // Select2 ইনিশিয়ালাইজেশন
+        $('.select2').select2({
+            placeholder: "ট্যাগ নির্বাচন করুন",
+            allowClear: true
+        });
+
         // ইমেজ প্রিভিউ দেখানোর জন্য
         $('#id_image').change(function() {
             readURL(this);
@@ -74,6 +88,15 @@
             }
         }
 
+        // বর্তমান ছবি মুছে ফেলার অপশন
+        $('#remove_image').change(function() {
+            if(this.checked) {
+                $('#current-image').css('opacity', '0.5');
+            } else {
+                $('#current-image').css('opacity', '1');
+            }
+        });
+
         // ফর্ম সাবমিশনের সময় লোডিং স্পিনার দেখানোর জন্য
         $('#post-form').submit(function() {
             $('#submit-btn').prop('disabled', true).html(
@@ -83,5 +106,3 @@
     });
 </script>
 {% endblock %}
-
-

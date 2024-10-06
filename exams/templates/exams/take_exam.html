@@ -1,31 +1,82 @@
-
 {% extends 'base.html' %}
-
-{% block title %}পরীক্ষা দিন{% endblock %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <h1 class="mb-4">{{ exam.title }}</h1>
-    <p>সময়সীমা: {{ exam.duration }} মিনিট</p>
-
-    <form method="post" action="{% url 'exams:submit_exam' exam.id %}">
+    <div class="alert alert-info">
+        <p><strong>সময়সীমা:</strong> <span id="time-left"></span></p>
+        <p><strong>মোট প্রশ্ন:</strong> {{ questions.count }}</p>
+    </div>
+    <form method="post" id="exam-form">
         {% csrf_token %}
         {% for question in questions %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{{ forloop.counter }}. {{ question.text }}</h5>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">প্রশ্ন {{ forloop.counter }}: {{ question.question_text|safe }}</h5>
+                {% if question.question_type == 'MCQ' or question.question_type == 'TF' %}
                     {% for option in question.get_options %}
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="q{{ question.id }}" id="q{{ question.id }}_{{ forloop.counter }}" value="{{ option }}">
-                            <label class="form-check-label" for="q{{ question.id }}_{{ forloop.counter }}">
+                            <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="option_{{ question.id }}_{{ forloop.counter }}" value="{{ option }}">
+                            <label class="form-check-label" for="option_{{ question.id }}_{{ forloop.counter }}">
                                 {{ option }}
                             </label>
                         </div>
                     {% endfor %}
-                </div>
+                {% elif question.question_type == 'SA' %}
+                    <textarea class="form-control" name="question_{{ question.id }}" rows="3"></textarea>
+                {% endif %}
             </div>
+        </div>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">পরীক্ষা জমা দিন</button>
+        <button type="submit" class="btn btn-primary" id="submit-btn">পরীক্ষা জমা দিন</button>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var duration = {{ exam.duration }} * 60; // মিনিট থেকে সেকেন্ডে রূপান্তর
+        var timeLeft = duration;
+        var timerElement = document.getElementById('time-left');
+        var form = document.getElementById('exam-form');
+        var submitBtn = document.getElementById('submit-btn');
+
+        function updateTimer() {
+            var hours = Math.floor(timeLeft / 3600);
+            var minutes = Math.floor((timeLeft % 3600) / 60);
+            var seconds = timeLeft % 60;
+
+            timerElement.textContent = 
+                (hours < 10 ? "0" + hours : hours) + ":" +
+                (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                (seconds < 10 ? "0" + seconds : seconds);
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                submitExam();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function submitExam() {
+            submitBtn.disabled = true;
+            form.submit();
+        }
+
+        var timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            submitExam();
+        });
+
+        form.addEventListener('submit', function(e) {
+            submitBtn.disabled = true;
+        });
+    });
+</script>
 {% endblock %}

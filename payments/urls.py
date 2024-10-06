@@ -3,18 +3,15 @@ from . import views
 
 app_name = 'payments'
 
+
 urlpatterns = [
-    # পেমেন্ট প্রক্রিয়া
-    path('process/<str:item_type>/<int:item_id>/', views.process_payment, name='process_payment'),
+    path('initiate/<str:item_type>/<int:item_id>/', views.initiate_payment, name='initiate_payment'),
     path('success/', views.payment_success, name='payment_success'),
-    path('failed/', views.payment_failed, name='payment_failed'),
-    path('canceled/', views.payment_canceled, name='payment_canceled'),
-    path('ipn/', views.payment_ipn, name='payment_ipn'),
-
-    # পেমেন্ট ইতিহাস এবং রিফান্ড
-    path('history/', views.transaction_history, name='transaction_history'),
-    path('refund/<int:payment_id>/', views.refund_request, name='refund_request'),
-
-    # ডিসকাউন্ট
-    path('apply-discount/', views.apply_discount, name='apply_discount'),
+    path('fail/', views.payment_fail, name='payment_fail'),
+    path('cancel/', views.payment_cancel, name='payment_cancel'),
+    path('details/<int:payment_id>/', views.payment_details, name='payment_details'),
+    path('apply-discount/<int:payment_id>/', views.apply_discount, name='apply_discount'),
+    path('request-refund/<int:payment_id>/', views.request_refund, name='request_refund'),
+    path('refunds/', views.refund_list, name='refund_list'),
+    path('transaction-history/', views.transaction_history, name='transaction_history'),
 ]

@@ -1,11 +1,24 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>ফলাফল বিশ্লেষণ</h1>
-<p>মোট প্রশ্ন: {{ result.total_questions }}</p>
-<p>সঠিক উত্তর: {{ result.correct_answers }}</p>
-<p>ভুল উত্তর: {{ result.wrong_answers }}</p>
-<p>স্কোর: {{ result.score }}</p>
-<p>শতকরা হার: {{ result.calculate_percentage|floatformat:2 }}%</p>
+<div class="container mt-5">
+    <h1 class="mb-4">ফলাফল বিশ্লেষণ</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">
+                {% if result.content_object.live_exam %}
+                    লাইভ পরীক্ষা: {{ result.content_object.live_exam.title }}
+                {% else %}
+                    পরীক্ষা: {{ result.content_object.exam.title }}
+                {% endif %}
+            </h5>
+            <p class="card-text">স্কোর: {{ result.score }}</p>
+            <p class="card-text">সঠিক উত্তর: {{ result.correct_answers }}</p>
+            <p class="card-text">ভুল উত্তর: {{ result.wrong_answers }}</p>
+            <p class="card-text">সময় ব্যবহার: {{ result.time_taken }}</p>
+            
+            <!-- এখানে আরও বিস্তারিত বিশ্লেষণ যোগ করুন -->
+        </div>
+    </div>
+</div>
 {% endblock %}

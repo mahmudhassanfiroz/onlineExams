@@ -1,10 +1,41 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>ফলাফলের সারসংক্ষেপ</h1>
-<p>মোট পরীক্ষা: {{ total_exams }}</p>
-<p>মোট স্কোর: {{ total_score }}</p>
-<p>সঠিক উত্তর: {{ total_correct }}</p>
-<p>ভুল উত্তর: {{ total_wrong }}</p>
+<div class="container mt-5">
+    <h1 class="mb-4">ফলাফলের সারসংক্ষেপ</h1>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">মোট পরীক্ষা</h5>
+                    <p class="card-text display-4">{{ total_exams }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">মোট স্কোর</h5>
+                    <p class="card-text display-4">{{ total_score }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">মোট সঠিক উত্তর</h5>
+                    <p class="card-text display-4">{{ total_correct }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">মোট ভুল উত্তর</h5>
+                    <p class="card-text display-4">{{ total_wrong }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">পেমেন্ট বিবরণ</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">লেনদেন আইডি: {{ payment.tran_id }}</h5>
+            <p class="card-text">পরিমাণ: {{ payment.amount }} টাকা</p>
+            <p class="card-text">স্ট্যাটাস: {{ payment.get_status_display }}</p>
+            <p class="card-text">তারিখ: {{ payment.created_at }}</p>
+            {% if payment.discount %}
+                <p class="card-text">ডিসকাউন্ট: {{ payment.discount.amount }} টাকা</p>
+            {% endif %}
+            {% if payment.status == 'COMPLETED' %}
+                <p class="card-text">কার্ডের ধরন: {{ payment.card_type }}</p>
+                <p class="card-text">কার্ড নম্বর: {{ payment.card_no }}</p>
+                <p class="card-text">ব্যাংক লেনদেন আইডি: {{ payment.bank_tran_id }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not payment.discount %}
+    <div class="mt-4">
+        <h3>ডিসকাউন্ট কোড প্রয়োগ করুন</h3>
+        <form method="post" action="{% url 'apply_discount' payment.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="discount_code" class="form-control" placeholder="ডিসকাউন্ট কোড" required>
+            </div>
+            <button type="submit" class="btn btn-primary">প্রয়োগ করুন</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if payment.status == 'COMPLETED' and not payment.refund %}
+    <div class="mt-4">
+        <a href="{% url 'request_refund' payment.id %}" class="btn btn-warning">রিফান্ড অনুরোধ করুন</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

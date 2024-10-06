@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">রিফান্ড অনুরোধ</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">লেনদেন আইডি: {{ payment.tran_id }}</h5>
+            <p class="card-text">পরিমাণ: {{ payment.amount }} টাকা</p>
+            <p class="card-text">তারিখ: {{ payment.created_at }}</p>
+        </div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="reason">রিফান্ডের কারণ</label>
+            <textarea name="reason" id="reason" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">রিফান্ড অনুরোধ জমা দিন</button>
+    </form>
+</div>
+{% endblock %}

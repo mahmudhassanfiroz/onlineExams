@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ package.name }}</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">প্যাকেজের বিবরণ</h5>
+                    <p class="card-text">{{ package.description|safe }}</p>
+                    <p class="card-text"><strong>মূল্য:</strong> {{ package.price }} টাকা</p>
+                    <p class="card-text"><strong>মেয়াদ:</strong> {{ package.duration }}</p>
+                    <a href="{% url 'services:purchase_package' package.slug %}" class="btn btn-primary">কিনুন</a>
+                </div>
+            </div>
+            
+            <h2 class="mb-3">এই প্যাকেজে অন্তর্ভুক্ত পরীক্ষাসমূহ</h2>
+            {% if exams_by_category %}
+                <div class="accordion" id="examAccordion">
+                    {% for category, exams in exams_by_category.items %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                                    {{ category.name }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#examAccordion">
+                                <div class="accordion-body">
+                                    <div class="list-group">
+                                        {% for exam in exams %}
+                                            <a href="{% url 'exams:exam_detail' exam.slug %}" class="list-group-item list-group-item-action">
+                                                {{ exam.title }}
+                                            </a>
+                                        {% empty %}
+                                            <p class="list-group-item">এই ক্যাটাগরিতে কোনো পরীক্ষা নেই।</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="alert alert-info">এই প্যাকেজে কোনো পরীক্ষা অন্তর্ভুক্ত নেই।</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <!-- এখানে সাইডবার কন্টেন্ট যোগ করুন (যদি প্রয়োজন হয়) -->
+        </div>
+    </div>
+</div>
+{% endblock %}

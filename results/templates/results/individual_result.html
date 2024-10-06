@@ -1,14 +1,35 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ result.exam.title }} এর ফলাফল</h1>
-<p>নাম: {{ result.user.get_full_name }}</p>
-<p>ব্যবহারকারীর নাম: {{ result.user.username }}</p>
-<p>ব্যাচ: {{ result.exam.batch.name }}</p>
-<p>পরীক্ষার তারিখ: {{ result.submission_time }}</p>
-<p>স্কোর: {{ result.score }}</p>
-<p>সঠিক উত্তর: {{ result.correct_answers }}</p>
-<p>ভুল উত্তর: {{ result.wrong_answers }}</p>
-<a href="{% url 'results:generate_pdf' result.id %}">PDF ডাউনলোড করুন</a>
+<div class="container mt-5">
+    <h1 class="mb-4">পরীক্ষার ফলাফল</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">
+                {% if result.content_object.live_exam %}
+                    লাইভ পরীক্ষা: {{ result.content_object.live_exam.title }}
+                {% else %}
+                    পরীক্ষা: {{ result.content_object.exam.title }}
+                {% endif %}
+            </h5>
+            <p class="card-text">স্কোর: {{ result.score }}</p>
+            <p class="card-text">সঠিক উত্তর: {{ result.correct_answers }}</p>
+            <p class="card-text">ভুল উত্তর: {{ result.wrong_answers }}</p>
+            <p class="card-text">জমা দেওয়ার সময়: {{ result.submission_time }}</p>
+            <a href="{% url 'results:result_analysis' result.id %}" class="btn btn-primary">বিস্তারিত বিশ্লেষণ</a>
+            <a href="{% url 'results:generate_pdf' result.id %}" class="btn btn-secondary">PDF ডাউনলোড</a>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>মন্তব্য জমা দিন</h3>
+        <form method="post" action="{% url 'results:submit_feedback' result.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea name="comment" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">জমা দিন</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

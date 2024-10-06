@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">পরীক্ষার ফলাফল</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ user_exam.exam.title }}</h5>
+            <p class="card-text"><strong>স্কোর:</strong> {{ user_exam.score }} / {{ user_exam.exam.questions.count }}</p>
+            <p class="card-text"><strong>শুরুর সময়:</strong> {{ user_exam.start_time }}</p>
+            <p class="card-text"><strong>শেষের সময়:</strong> {{ user_exam.end_time }}</p>
+        </div>
+    </div>
+
+    <h2 class="mb-3">উত্তরসমূহ</h2>
+    {% for answer in answers %}
+        <div class="card mb-3 {% if answer.is_correct %}border-success{% else %}border-danger{% endif %}">
+            <div class="card-body">
+                <h5 class="card-title">প্রশ্ন {{ forloop.counter }}: {{ answer.question.text }}</h5>
+                <p class="card-text"><strong>আপনার উত্তর:</strong> {{ answer.answer_text }}</p>
+                <p class="card-text"><strong>সঠিক উত্তর:</strong> {{ answer.question.correct_answer }}</p>
+                {% if answer.is_correct %}
+                    <p class="text-success">সঠিক!</p>
+                {% else %}
+                    <p class="text-danger">ভুল</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

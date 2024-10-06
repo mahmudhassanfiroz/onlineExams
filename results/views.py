@@ -2,17 +2,28 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Result, Feedback, Leaderboard
-from liveExam.models import LiveExam
+from liveExam.models import LiveExam, UserLiveExam
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import matplotlib.pyplot as plt
 import io
 import base64
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
+from results.models import Result
+from exams.models import UserExam
 
 @login_required
 def results_overview(request):
-    results = Result.objects.filter(user=request.user)
+    user_live_exam_content_type = ContentType.objects.get_for_model(UserLiveExam)
+    user_exam_content_type = ContentType.objects.get_for_model(UserExam)
+
+    results = Result.objects.filter(
+        Q(content_type=user_live_exam_content_type, object_id__in=UserLiveExam.objects.filter(user=request.user).values_list('id', flat=True)) |
+        Q(content_type=user_exam_content_type, object_id__in=UserExam.objects.filter(user=request.user).values_list('id', flat=True))
+    ).order_by('-submission_time')
+
     total_exams = results.count()
     total_score = sum(result.score for result in results)
     total_correct = sum(result.correct_answers for result in results)
@@ -28,26 +39,29 @@ def results_overview(request):
 
 @login_required
 def individual_result(request, result_id):
-    result = get_object_or_404(Result, id=result_id, user=request.user)
+    result = get_object_or_404(Result, id=result_id, content_object__user=request.user)
     context = {'result': result}
     return render(request, 'results/individual_result.html', context)
 
 @login_required
 def result_analysis(request, result_id):
-    result = get_object_or_404(Result, id=result_id, user=request.user)
+    result = get_object_or_404(Result, id=result_id, content_object__user=request.user)
     context = {'result': result}
     return render(request, 'results/result_analysis.html', context)
 
 @login_required
 def generate_pdf(request, result_id):
-    result = get_object_or_404(Result, id=result_id, user=request.user)
+    result = get_object_or_404(Result, id=result_id, content_object__user=request.user)
     
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     
     # Add content to the PDF
-    p.drawString(100, 750, f"Result for {result.user.username}")
-    p.drawString(100, 700, f"Exam: {result.exam.title}")
+    p.drawString(100, 750, f"Result for {result.content_object.user.username}")
+    if isinstance(result.content_object, UserLiveExam):
+        p.drawString(100, 700, f"Live Exam: {result.content_object.live_exam.title}")
+    else:
+        p.drawString(100, 700, f"Exam: {result.content_object.exam.title}")
     p.drawString(100, 650, f"Score: {result.score}")
     p.drawString(100, 600, f"Correct Answers: {result.correct_answers}")
     p.drawString(100, 550, f"Wrong Answers: {result.wrong_answers}")
@@ -61,13 +75,13 @@ def generate_pdf(request, result_id):
 @login_required
 def leaderboard(request, exam_id):
     exam = get_object_or_404(LiveExam, id=exam_id)
-    leaderboard = Leaderboard.objects.filter(exam=exam).order_by('rank')
+    leaderboard = Leaderboard.objects.filter(live_exam=exam).order_by('rank')
     context = {'leaderboard': leaderboard, 'exam': exam}
     return render(request, 'results/leaderboard.html', context)
 
 @login_required
 def result_comparison(request):
-    results = Result.objects.filter(user=request.user).order_by('-submission_time')
+    results = Result.objects.filter(content_object__user=request.user).order_by('-submission_time')
     
     # Create a line chart
     plt.figure(figsize=(10, 5))
@@ -95,7 +109,7 @@ def result_comparison(request):
 @login_required
 def submit_feedback(request, result_id):
     if request.method == 'POST':
-        result = get_object_or_404(Result, id=result_id, user=request.user)
+        result = get_object_or_404(Result, id=result_id, content_object__user=request.user)
         comment = request.POST.get('comment')
         Feedback.objects.create(result=result, comment=comment)
         return redirect('results:individual_result', result_id=result_id)

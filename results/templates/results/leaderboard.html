@@ -1,20 +1,25 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ exam.title }} এর লিডারবোর্ড</h1>
-<table>
-    <tr>
-        <th>র‍্যাঙ্ক</th>
-        <th>নাম</th>
-        <th>স্কোর</th>
-    </tr>
-    {% for entry in leaderboard %}
-    <tr>
-        <td>{{ entry.rank }}</td>
-        <td>{{ entry.user.get_full_name }}</td>
-        <td>{{ entry.score }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="container mt-5">
+    <h1 class="mb-4">লিডারবোর্ড: {{ exam.title }}</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>র‍্যাঙ্ক</th>
+                <th>ব্যবহারকারী</th>
+                <th>স্কোর</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in leaderboard %}
+            <tr>
+                <td>{{ entry.rank }}</td>
+                <td>{{ entry.user.username }}</td>
+                <td>{{ entry.score }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

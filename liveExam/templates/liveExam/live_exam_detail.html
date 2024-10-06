@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ live_exam.title }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="card-text">{{ live_exam.description }}</p>
+            <p class="card-text"><strong>তারিখ:</strong> {{ live_exam.exam_date }}</p>
+            <p class="card-text"><strong>সময়:</strong> {{ live_exam.start_time }} - {{ live_exam.end_time }}</p>
+            <p class="card-text"><strong>মোট প্রশ্ন:</strong> {{ live_exam.questions.count }}</p>
+            <p class="card-text"><strong>সময়সীমা:</strong> {{ live_exam.duration }} মিনিট</p>
+            <p class="card-text"><strong>ক্যাটাগরি:</strong> {{ live_exam.exam_category.name }}</p>
+            {% if live_exam.is_free %}
+                <p class="card-text"><span class="badge bg-success">বিনামূল্যে</span></p>
+            {% endif %}
+            {% if can_take_exam %}
+                <div id="exam-button-container">
+                    {% if live_exam.is_active %}
+                        <a href="{% url 'liveExam:take_live_exam' live_exam.slug %}" class="btn btn-primary">পরীক্ষা দিন</a>
+                    {% else %}
+                        <a id="exam-button" class="btn btn-secondary disabled" role="button" aria-disabled="true">
+                            পরীক্ষা শুরু হতে <span id="countdown"></span> বাকি
+                        </a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="text-danger">এই পরীক্ষা দেওয়ার জন্য আপনাকে প্যাকেজ কিনতে হবে।</p>
+                <a href="{% url 'package_list' %}" class="btn btn-primary">প্যাকেজ দেখুন</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var examDate = new Date("{{ live_exam.exam_date|date:'Y-m-d' }}T{{ live_exam.start_time|time:'H:i' }}:00");
+        var examButton = document.getElementById('exam-button');
+        var countdownElement = document.getElementById('countdown');
+
+        function updateCountdown() {
+            var now = new Date();
+            var timeLeft = examDate - now;
+
+            if (timeLeft > 0) {
+                var days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                countdownElement.textContent = days + "দিন " + hours + "ঘণ্টা " + minutes + "মিনিট " + seconds + "সেকেন্ড";
+            } else {
+                clearInterval(countdownInterval);
+                examButton.textContent = 'পরীক্ষা দিন';
+                examButton.classList.remove('btn-secondary', 'disabled');
+                examButton.classList.add('btn-primary');
+                examButton.removeAttribute('aria-disabled');
+                examButton.href = "{% url 'liveExam:take_live_exam' live_exam.slug %}";
+            }
+        }
+
+        if (examButton) {
+            var countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
+
+            examButton.addEventListener('click', function(event) {
+                if (this.classList.contains('disabled')) {
+                    event.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

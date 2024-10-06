@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.urls import reverse
 from django_ckeditor_5.fields import CKEditor5Field
 from django.core.exceptions import ValidationError
+from django.utils.html import strip_tags
+import json
 
 class MarqueeNotice(models.Model):
     message = CKEditor5Field()
@@ -11,7 +13,10 @@ class MarqueeNotice(models.Model):
     end_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.message[:50]
+        return strip_tags(self.message)[:50]
+
+    def get_stripped_message(self):
+        return strip_tags(self.message)
 
     class Meta:
         ordering = ['-start_date']
@@ -24,6 +29,9 @@ class CarouselSlide(models.Model):
     button_url = models.CharField(max_length=200, blank=True, null=True)
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+
+    def get_stripped_description(self):
+        return strip_tags(self.description)
 
     class Meta:
         ordering = ['order']
@@ -38,12 +46,16 @@ class CTASection(models.Model):
     button_url = models.CharField(max_length=200)
     is_active = models.BooleanField(default=True)
 
+    def get_stripped_description(self):
+        return strip_tags(self.description)
+
     def __str__(self):
         return self.title
 
     class Meta:
         verbose_name = "CTA Section"
         verbose_name_plural = "CTA Sections"
+
 
 class FooterContent(models.Model):
     contact_title = models.CharField(max_length=100, default="যোগাযোগ")
@@ -189,22 +201,61 @@ class ContactAdditionalInfo(models.Model):
         return self.title
 
 class Advertisement(models.Model):
-    title = models.CharField(max_length=200, verbose_name="শিরোনাম")
-    content = CKEditor5Field(verbose_name="বিষয়বস্তু")
-    image = models.ImageField(upload_to='advertisements/', blank=True, null=True, verbose_name="ছবি")
-    url = models.URLField(blank=True, verbose_name="লিংক")
-    is_active = models.BooleanField(default=True, verbose_name="সক্রিয়")
-    position = models.CharField(max_length=50, choices=[
+    POSITION_CHOICES = [
         ('top', 'শীর্ষে'),
         ('bottom', 'নীচে'),
         ('sidebar', 'সাইডবারে')
-    ], verbose_name="অবস্থান")
+    ]
+    
+    AD_TYPE_CHOICES = [
+        ('custom', 'কাস্টম বিজ্ঞাপন'),
+        ('google', 'Google Ads')
+    ]
+
+    title = models.CharField(max_length=200, verbose_name="শিরোনাম", null=True, blank=True)
+    ad_type = models.CharField(max_length=10, choices=AD_TYPE_CHOICES, default='custom', verbose_name="বিজ্ঞাপনের ধরন")
+    content = CKEditor5Field(verbose_name="বিষয়বস্তু", blank=True, null=True)
+    image = models.ImageField(upload_to='advertisements/', blank=True, null=True, verbose_name="ছবি")
+    url = models.URLField(blank=True, verbose_name="লিংক")
+    google_ad_code = models.TextField(blank=True, verbose_name="Google Ads কোড")
+    is_active = models.BooleanField(default=True, verbose_name="সক্রিয়")
+    position = models.CharField(max_length=50, choices=POSITION_CHOICES, verbose_name="অবস্থান")
 
     class Meta:
         verbose_name = "বিজ্ঞাপন"
         verbose_name_plural = "বিজ্ঞাপনসমূহ"
 
     def __str__(self):
-        return self.title
+       return self.title or f"Advertisement {self.id}"
 
+    def clean(self):
+        if self.ad_type == 'custom':
+            if not self.image and not self.url and not self.content:
+                raise ValidationError("কাস্টম বিজ্ঞাপনের জন্য ইমেজ, URL অথবা কন্টেন্ট প্রয়োজন।")
+        elif self.ad_type == 'google':
+            if not self.google_ad_code:
+                raise ValidationError("Google Ads এর জন্য Google Ads কোড প্রয়োজন।")
 
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def get_ad_json(self):
+        return json.dumps({
+            'id': self.id,
+            'type': self.ad_type,
+            'content': self.get_ad_content(),
+            'url': self.url,
+            'title': self.title or f"বিজ্ঞাপন {self.id}",
+            'image_url': self.image.url if self.image else None,
+            'position': self.position,
+            'is_active': self.is_active,
+        })
+
+    def get_ad_content(self):
+        if self.ad_type == 'google':
+            return self.google_ad_code
+        else:
+            if self.image:
+                return f'<img src="{self.image.url}" alt="{self.title or "বিজ্ঞাপন"}">'
+            return self.content or ""

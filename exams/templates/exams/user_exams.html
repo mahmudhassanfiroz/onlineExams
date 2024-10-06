@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">আমার পরীক্ষাসমূহ</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>পরীক্ষার নাম</th>
+                <th>তারিখ</th>
+                <th>স্কোর</th>
+                <th>স্ট্যাটাস</th>
+                <th>অ্যাকশন</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_exam in user_exams %}
+                <tr>
+                    <td>{{ user_exam.exam.title }}</td>
+                    <td>{{ user_exam.start_time|date:"F d, Y H:i" }}</td>
+                    <td>{{ user_exam.score }} / {{ user_exam.exam.questions.count }}</td>
+                    <td>
+                        {% if user_exam.is_completed %}
+                            <span class="badge bg-success">সম্পন্ন</span>
+                        {% else %}
+                            <span class="badge bg-warning">অসম্পূর্ণ</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user_exam.is_completed %}
+                            <a href="{% url 'exams:exam_result' user_exam.id %}" class="btn btn-sm btn-primary">ফলাফল দেখুন</a>
+                        {% else %}
+                            <a href="{% url 'exams:take_exam' user_exam.exam.slug %}" class="btn btn-sm btn-warning">পরীক্ষা চালিয়ে যান</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">আপনি এখনও কোনো পরীক্ষায় অংশগ্রহণ করেননি।</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

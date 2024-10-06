@@ -1,20 +1,46 @@
-
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/customize_dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>ড্যাশবোর্ড কাস্টমাইজ করুন</h1>
-
-<form method="post">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="layout">লেআউট নির্বাচন করুন:</label>
-        <select name="layout" id="layout" class="form-control">
-            <option value="default">ডিফল্ট</option>
-            <option value="compact">কম্প্যাক্ট</option>
-            <option value="expanded">বিস্তৃত</option>
-        </select>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0">ড্যাশবোর্ড কাস্টমাইজ করুন</h1>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="layout" class="form-label">লেআউট নির্বাচন করুন:</label>
+                            <select name="layout" id="layout" class="form-select">
+                                <option value="default" {% if current_layout == 'default' %}selected{% endif %}>ডিফল্ট</option>
+                                <option value="compact" {% if current_layout == 'compact' %}selected{% endif %}>কম্প্যাক্ট</option>
+                                <option value="expanded" {% if current_layout == 'expanded' %}selected{% endif %}>বিস্তৃত</option>
+                            </select>
+                        </div>
+                        <div class="layout-preview mb-4">
+                            <h4>লেআউট প্রিভিউ:</h4>
+                            <div id="layout-preview-container" class="border p-3">
+                                <!-- প্রিভিউ কন্টেন্ট JavaScript দ্বারা আপডেট হবে -->
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">সংরক্ষণ করুন</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">সংরক্ষণ করুন</button>
-</form>
+</div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{% static 'js/customize_dashboard.js' %}"></script>
 {% endblock %}
