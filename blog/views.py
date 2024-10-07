@@ -14,7 +14,7 @@ from .models import Post, Tag, Comment, Reaction, Subscription
 from .forms import PostForm, CommentForm, SubscriptionForm
 
 def post_list(request, tag_slug=None):
-    posts = Post.objects.filter(status='published', published_at__lte=timezone.now()).order_by('-published_at')
+    posts = Post.objects.filter(status='published', published_at__lte=timezone.now()).select_related('author').only('title', 'slug', 'author__username', 'published_at', 'content').order_by('-published_at')
     
     search_query = request.GET.get('search')
     if search_query:
@@ -24,7 +24,7 @@ def post_list(request, tag_slug=None):
         tag = get_object_or_404(Tag, slug=tag_slug)
         posts = posts.filter(tags=tag)
     
-    featured_posts = Post.objects.filter(is_featured=True, status='published')[:3]
+    featured_posts = Post.objects.filter(is_featured=True, status='published').select_related('author').only('title', 'slug', 'author__username', 'published_at')[:3]
     
     # Archive dates
     archive_dates = posts.annotate(month=TruncMonth('published_at')) \
@@ -50,14 +50,19 @@ def post_list(request, tag_slug=None):
     page = request.GET.get('page')
     posts = paginator.get_page(page)
     
+    recent_posts = Post.objects.filter(status='published').select_related('author').only('title', 'slug', 'author__username', 'published_at').order_by('-published_at')[:5]
+    
+    tags = Tag.objects.annotate(post_count=Count('post'))
+    
     context = {
         'posts': posts,
         'featured_posts': featured_posts,
-        'tags': Tag.objects.annotate(post_count=Count('post')),
-        'recent_posts': Post.objects.filter(status='published').order_by('-published_at')[:5],
+        'tags': tags,
+        'recent_posts': recent_posts,
         'archive_dates': archive_dates,
     }
     return render(request, 'blog/post_list.html', context)
+
 
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug, status='published')
@@ -114,15 +119,18 @@ def create_post(request):
                 post.save()
                 form.save_m2m()  # ট্যাগ সেভ করা
                 messages.success(request, 'আপনার পোস্ট সফলভাবে তৈরি করা হয়েছে।')
-                return redirect('blog:post_detail', slug=post.slug)
+                return redirect('blog:post_list')  # ব্লগের মূল পেজে রিডাইরেক্ট
             except Exception as e:
                 messages.error(request, f'পোস্ট সেভ করতে সমস্যা: {str(e)}')
         else:
-            messages.error(request, 'পোস্ট তৈরি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = PostForm()
     
     return render(request, 'blog/create_post.html', {'form': form})
+
 
 @login_required
 def edit_post(request, slug):

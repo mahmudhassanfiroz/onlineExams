@@ -5,7 +5,7 @@
     <h1 class="mb-4">{{ exam.title }}</h1>
     <div class="card mb-4">
         <div class="card-body">
-            <p class="card-text">{{ exam.description }}</p>
+            <p class="card-text">{{ exam.description | safe }}</p>
             <p class="card-text"><strong>প্রশ্ন সংখ্যা:</strong> {{ exam.questions.count }}</p>
             <p class="card-text"><strong>সময়সীমা:</strong> {{ exam.duration }} মিনিট</p>
             <p class="card-text"><strong>ক্যাটাগরি:</strong> {{ exam.exam_category.name }}</p>

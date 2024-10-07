@@ -1,147 +1,65 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters_dash %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 dashboard-container {% if user_preference.dashboard_layout %}{{ user_preference.dashboard_layout }}{% else %}default{% endif %}">
     <h1 class="mb-4">ড্যাশবোর্ড</h1>
 
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card user-overview">
-                <div class="card-body text-center">
-                    {% if user_profile.profile_picture %}
-                        <img src="{{ user_profile.profile_picture.url }}" alt="প্রোফাইল ছবি" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'images/default_profile.png' %}" alt="ডিফল্ট প্রোফাইল ছবি" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                    {% endif %}
-                    <h2 class="card-title">{{ user_profile.user.get_full_name }}</h2>
-                    <p class="card-text">ব্যাচ: {{ user_profile.batch.name }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="card-title">আসন্ন পরীক্ষা</h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                    {% for exam in upcoming_exams %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ exam.title }} - {{ exam.start_time|date:"F d, Y H:i" }}
-                            {% if exam.id in user_registered_exams %}
-                                <span class="badge bg-success">নিবন্ধিত</span>
-                            {% else %}
-                                <a href="{% url 'exams:exam_registration' exam.id %}" class="btn btn-primary btn-sm">নিবন্ধন করুন</a>
-                            {% endif %}
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">কোনো আসন্ন পরীক্ষা নেই।</li>
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="card-title">সাম্প্রতিক ফলাফল</h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                    {% for result in recent_results %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ result.exam.title }} - স্কোর: {{ result.score }}
-                            <a href="{% url 'results:individual_result' result.id %}" class="btn btn-info btn-sm">বিস্তারিত</a>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">কোনো সাম্প্রতিক ফলাফল নেই।</li>
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">নোটিফিকেশন</h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                    {% for notification in notifications %}
-                        <li class="list-group-item">{{ notification.message }}</li>
-                    {% empty %}
-                        <li class="list-group-item">কোনো নতুন নোটিফিকেশন নেই।</li>
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">দ্রুত লিঙ্ক</h3>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        <a href="{% url 'exams:exam_list' %}" class="list-group-item list-group-item-action">পরীক্ষা তালিকা</a>
-                        <a href="{% url 'results:overview' %}" class="list-group-item list-group-item-action">ফলাফল সারসংক্ষেপ</a>
-                        <a href="{% url 'accounts:account_settings' %}" class="list-group-item list-group-item-action">একাউন্ট সেটিংস</a>
+    <div class="row" id="dashboard-widgets">
+        {% for widget_name in widget_order %}
+            {% with widget_data=widgets|get_item:widget_name %}
+                {% if widget_name == 'user_overview' %}
+                    <div class="col-md-4 mb-4 widget" data-widget-type="user_overview">
+                        {% include 'dashboard/widgets/user_overview.html' with user_profile=widget_data.user_profile %}
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-8 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">সাম্প্রতিক কার্যক্রম</h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                    {% for activity in recent_activities %}
-                        <li class="list-group-item">
-                            <small class="text-muted">{{ activity.created_at|timesince }} আগে</small>
-                            <br>
-                            {{ activity.description }}
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">কোনো সাম্প্রতিক কার্যক্রম নেই।</li>
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">সহায়তা</h3>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        <a href="{% url 'contact' %}" class="list-group-item list-group-item-action">যোগাযোগ করুন</a>
-                        {% comment %}
-                        <a href="{% url 'services:service_faq' service_id.id %}" class="list-group-item list-group-item-action">সাধারণ প্রশ্নোত্তর</a>
-                        {% endcomment %}
+                {% elif widget_name == 'performance_metrics' %}
+                    <div class="col-md-8 mb-4 widget" data-widget-type="performance_metrics">
+                        {% include 'dashboard/widgets/performance_metrics.html' with data=widget_data %}
                     </div>
-                </div>
-            </div>
-        </div>
+                {% elif widget_name == 'recent_results' %}
+                    <div class="col-md-6 mb-4 widget" data-widget-type="recent_results">
+                        {% include 'dashboard/widgets/recent_results.html' with recent_results=widget_data.recent_results %}
+                    </div>
+                {% elif widget_name == 'notifications' %}
+                    <div class="col-md-6 mb-4 widget" data-widget-type="notifications">
+                        {% include 'dashboard/widgets/notifications.html' with notifications=widget_data.notifications %}
+                    </div>
+                {% elif widget_name == 'recent_activities' %}
+                    <div class="col-md-8 mb-4 widget" data-widget-type="recent_activities">
+                        {% include 'dashboard/widgets/recent_activities.html' with recent_activities=widget_data.recent_activities %}
+                    </div>
+                {% elif widget_name == 'quick_links' %}
+                    <div class="col-md-4 mb-4 widget" data-widget-type="quick_links">
+                        {% include 'dashboard/widgets/quick_links.html' %}
+                    </div>
+                {% elif widget_name == 'upcoming_exams' %}
+                    <div class="col-md-6 mb-4 widget" data-widget-type="upcoming_exams">
+                        {% include 'dashboard/widgets/upcoming_exams.html' with upcoming_exams=widget_data.upcoming_exams %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
     </div>
 </div>
+
+<!-- প্রোফাইল ছবি পরিবর্তনের মোডাল -->
+{% include 'dashboard/widgets/change_profile_picture.html' %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+    // কালার স্কিম প্রয়োগ
+    document.body.classList.add('{% if user_preference.color_scheme %}{{ user_preference.color_scheme }}{% else %}light{% endif %}');
+
+    // লেআউট প্রয়োগ
+    document.querySelector('.dashboard-container').classList.add('{% if user_preference.dashboard_layout %}{{ user_preference.dashboard_layout }}{% else %}default{% endif %}');
+</script>
 {% endblock %}
+

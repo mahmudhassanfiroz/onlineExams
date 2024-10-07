@@ -1,3 +1,7 @@
+/* মূল স্টাইল */
+body {
+    transition: background-color 0.3s, color 0.3s;
+}
 
 .card {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -24,4 +28,106 @@
 .btn-sm {
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
+}
+
+/* কালার স্কিম স্টাইল */
+body.light {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+body.light .card {
+    background-color: #ffffff;
+}
+
+body.dark {
+    background-color: #333;
+    color: #f8f9fa;
+}
+
+body.dark .card {
+    background-color: #444;
+    border-color: #555;
+}
+
+body.dark .card-header {
+    background-color: #555;
+    border-bottom-color: #666;
+}
+
+body.dark .list-group-item {
+    background-color: #444;
+    border-color: #555;
+}
+
+body.dark .list-group-item:hover {
+    background-color: #555;
+}
+
+body.blue {
+    background-color: #e6f2ff;
+    color: #00366d;
+}
+
+body.blue .card {
+    background-color: #ffffff;
+    border-color: #b8daff;
+}
+
+body.blue .card-header {
+    background-color: #cce5ff;
+    border-bottom-color: #b8daff;
+}
+
+body.blue .list-group-item:hover {
+    background-color: #e6f2ff;
+}
+
+/* লেআউট স্টাইল */
+.dashboard-container {
+    transition: all 0.3s;
+}
+
+.dashboard-container.default {
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+.dashboard-container.compact {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.dashboard-container.compact .card {
+    margin-bottom: 1rem;
+}
+
+.dashboard-container.expanded {
+    max-width: 100%;
+    padding: 0 2rem;
+}
+
+.dashboard-container.expanded .row {
+    margin-left: -1rem;
+    margin-right: -1rem;
+}
+
+.dashboard-container.expanded .col-md-4,
+.dashboard-container.expanded .col-md-6,
+.dashboard-container.expanded .col-md-8 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* উইজেট স্টাইল */
+.widget {
+    transition: all 0.3s;
+}
+
+.dashboard-container.compact .widget {
+    margin-bottom: 1rem;
+}
+
+.dashboard-container.expanded .widget {
+    margin-bottom: 2rem;
 }

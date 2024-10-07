@@ -1,15 +1,34 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Q, Avg
 from django.contrib import messages
 from django.utils.html import strip_tags
+from django.contrib.auth.decorators import login_required
 from core.models import AboutPage, CTASection, CarouselSlide, MarqueeNotice, SiteSettings, ContactPage, FooterContent, MenuItem, Advertisement
 from services.models import Package
 from exams.models import UserExam
 from liveExam.models import LiveExam, UserLiveExam
+from results.models import Result, Feedback
 from .forms import ContactForm
+from .models import GeneralFeedback
 
 def home(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        feedback_type = request.POST.get('feedback_type')
+        comment = request.POST.get('comment')
+        
+        if feedback_type == 'general':
+            GeneralFeedback.objects.create(user=request.user, comment=comment)
+            messages.success(request, 'সাধারণ ফিডব্যাক সফলভাবে জমা দেওয়া হয়েছে।')
+        elif feedback_type == 'result':
+            result_id = request.POST.get('result_id')
+            if result_id:
+                result = get_object_or_404(Result, id=result_id)
+                Feedback.objects.create(result=result, comment=comment)
+                messages.success(request, 'রেজাল্ট ফিডব্যাক সফলভাবে জমা দেওয়া হয়েছে।')
+        
+        return redirect('home')
+
     context = {
         'featured_packages': Package.objects.filter(is_featured=True),
         'coaching_packages': Package.objects.filter(package_type='COACHING', is_featured=True),
@@ -33,6 +52,10 @@ def home(request):
     # HTML ট্যাগ রিমুভ করা (মডেল মেথড ব্যবহার করে)
     context['active_notices'] = [notice.get_stripped_message() for notice in context['active_notices']]
 
+    # সকল সাম্প্রতিক রেজাল্ট লোড করুন
+    recent_results = Result.objects.all().order_by('-submission_time')[:5]
+    context['recent_results'] = recent_results
+
     if request.user.is_authenticated:
         # Regular Exams
         user_exams = UserExam.objects.filter(user=request.user)
@@ -54,7 +77,10 @@ def home(request):
         ).order_by('exam_date', 'start_time')[:5]  # Get the next 5 upcoming exams
         context['upcoming_live_exams'] = upcoming_live_exams
 
+    context['general_feedbacks'] = GeneralFeedback.objects.all().order_by('-created_at')[:5]
+
     return render(request, 'core/home.html', context)
+
 
 def about(request):
     context = {

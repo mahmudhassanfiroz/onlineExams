@@ -5,6 +5,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 from django.core.exceptions import ValidationError
 from django.utils.html import strip_tags
 import json
+from accounts.models import CustomUser
 
 class MarqueeNotice(models.Model):
     message = CKEditor5Field()
@@ -259,3 +260,13 @@ class Advertisement(models.Model):
             if self.image:
                 return f'<img src="{self.image.url}" alt="{self.title or "বিজ্ঞাপন"}">'
             return self.content or ""
+
+
+class GeneralFeedback(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Feedback by {self.user.username} on {self.created_at}"
+

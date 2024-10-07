@@ -1,18 +1,26 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="row">
         <!-- Left Sidebar -->
-        <div class="col-md-3 d-none d-md-block sidebar">
-            <h4>জনপ্রিয় ট্যাগ</h4>
-            <div class="tag-cloud">
-                {% for tag in tags %}
-                    <a href="{% url 'blog:tag_posts' tag.slug %}" class="tag-item" style="font-size: {{ tag.post_count|add:10 }}px;">
-                        {{ tag.name }}
-                    </a>
-                {% endfor %}
+        <div class="col-md-3 d-none d-md-block sidebar left-sidebar">
+            <div class="sidebar-sticky">
+                <h4 class="sidebar-heading">জনপ্রিয় ট্যাগ</h4>
+                <div class="tag-cloud">
+                    {% for tag in tags %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="tag-item" style="font-size: {{ tag.post_count|add:10 }}px;">
+                            {{ tag.name }}
+                        </a>
+                    {% empty %}
+                        <p class="text-muted">কোনো ট্যাগ নেই।</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
@@ -31,19 +39,21 @@
             <form method="get" action="{% url 'blog:post_list' %}" class="search-form mb-4">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="পোস্ট খুঁজুন..." name="search" value="{{ request.GET.search }}">
-                    <button class="btn btn-outline-primary" type="submit">খুঁজুন</button>
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i> খুঁজুন
+                    </button>
                 </div>
             </form>
 
             {% if posts %}
                 {% for post in posts %}
-                <div class="card post-card mb-4">
+                <div class="card post-card mb-4 shadow-sm">
                     <div class="card-header post-header">
                         <div class="d-flex align-items-center">
                             <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.get_full_name }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
                             <div>
                                 <h5 class="mb-0"><a href="{% url 'blog:author_posts' post.author.username %}" class="text-dark">{{ post.author.get_full_name }}</a></h5>
-                                <small class="text-muted">{{ post.published_at|date:"F d, Y H:i" }}</small>
+                                <small class="text-muted"><i class="far fa-clock"></i> {{ post.published_at|date:"F d, Y H:i" }}</small>
                             </div>
                         </div>
                     </div>
@@ -52,11 +62,11 @@
                             <a href="{% url 'blog:post_detail' post.slug %}" class="text-decoration-none text-dark">{{ post.title }}</a>
                         </h4>
                         {% if post.image %}
-                        <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="{{ post.title }}">
+                        <img src="{{ post.image.url }}" class="img-fluid mb-3 rounded" alt="{{ post.title }}">
                         {% endif %}
                         <p class="card-text">{{ post.content|safe|truncatewords_html:50 }}</p>
                         {% if post.content|length > 300 %}
-                        <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-link p-0">আরও পড়ুন...</a>
+                        <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-link p-0">আরও পড়ুন <i class="fas fa-arrow-right"></i></a>
                         {% endif %}
                         <div class="mt-2">
                             {% for tag in post.tags.all %}
@@ -66,23 +76,21 @@
                     </div>
                     <div class="card-footer post-footer">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <button class="btn btn-outline-primary btn-sm reaction-btn mr-2" data-post-id="{{ post.id }}" data-reaction-type="like">
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary btn-sm reaction-btn" data-post-id="{{ post.id }}" data-reaction-type="like">
                                     <i class="far fa-thumbs-up"></i> <span class="reaction-count">{{ post.get_reaction_count.like }}</span>
                                 </button>
-                                <button class="btn btn-outline-primary btn-sm reaction-btn mr-2" data-post-id="{{ post.id }}" data-reaction-type="love">
+                                <button class="btn btn-outline-danger btn-sm reaction-btn" data-post-id="{{ post.id }}" data-reaction-type="love">
                                     <i class="far fa-heart"></i> <span class="reaction-count">{{ post.get_reaction_count.love }}</span>
                                 </button>
-                                <a href="{% url 'blog:post_detail' post.slug %}#comments" class="btn btn-outline-primary btn-sm mr-2">
+                                <a href="{% url 'blog:post_detail' post.slug %}#comments" class="btn btn-outline-secondary btn-sm">
                                     <i class="far fa-comment"></i> {{ post.comments.count }}
                                 </a>
-                                <button class="btn btn-outline-primary btn-sm share-btn" data-post-id="{{ post.id }}">
+                                <button class="btn btn-outline-info btn-sm share-btn" data-post-id="{{ post.id }}">
                                     <i class="far fa-share-square"></i> <span class="share-count">{{ post.shares }}</span>
                                 </button>
                             </div>
-                            <div>
-                                <small class="text-muted"><i class="fas fa-eye"></i> {{ post.views }} বার দেখা হয়েছে</small>
-                            </div>
+                            <small class="text-muted"><i class="fas fa-eye"></i> {{ post.views }} বার দেখা হয়েছে</small>
                         </div>
                     </div>
                 </div>
@@ -90,106 +98,67 @@
 
                 {% include 'blog/pagination.html' with page=posts %}
             {% else %}
-                <div class="alert alert-info">কোনো পোস্ট পাওয়া যায়নি।</div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> কোনো পোস্ট পাওয়া যায়নি।
+                </div>
             {% endif %}
         </main>
 
         <!-- Right Sidebar -->
-        <div class="col-md-3 d-none d-md-block sidebar">
-            <h4>সাম্প্রতিক পোস্ট</h4>
-            <ul class="list-unstyled">
-                {% for post in recent_posts %}
-                <li class="mb-2">
-                    <a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a>
-                    <small class="text-muted d-block">{{ post.published_at|date:"F d, Y" }}</small>
-                </li>
-                {% endfor %}
-            </ul>
-
-            <h4 class="mt-4">আর্কাইভ</h4>
-            <ul class="list-unstyled">
-                {% for date in archive_dates %}
-                <li>
-                    <a href="#" data-bs-toggle="collapse" data-bs-target="#collapse{{ date.year }}">
-                        <i class="fas fa-chevron-right"></i> {{ date.year }}
-                    </a>
-                    <ul class="collapse list-unstyled" id="collapse{{ date.year }}">
-                        {% for month in date.months %}
-                        <li>
-                            <a href="{% url 'blog:archive' date.year month.number %}">
-                                {{ month.name }} ({{ month.count }})
+        <div class="col-md-3 d-none d-md-block sidebar right-sidebar">
+            <div class="sidebar-sticky">
+                <h4 class="sidebar-heading">সাম্প্রতিক পোস্ট</h4>
+                <ul class="list-unstyled recent-posts">
+                    {% for post in recent_posts %}
+                    <li class="mb-2">
+                        {% if post.slug %}
+                            <a href="{% url 'blog:post_detail' post.slug %}" class="text-decoration-none">
+                                <h6 class="mb-0">{{ post.title }}</h6>
                             </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endfor %}
-            </ul>
+                        {% else %}
+                            <h6 class="mb-0">{{ post.title }}</h6>
+                        {% endif %}
+                        <small class="text-muted d-block">
+                            {% if post.published_at %}
+                                <i class="far fa-calendar-alt"></i> {{ post.published_at|date:"F d, Y" }}
+                            {% endif %}
+                        </small>
+                        {% if post.author %}
+                            <small class="text-muted d-block"><i class="far fa-user"></i> {{ post.author.username }}</small>
+                        {% endif %}
+                    </li>
+                    {% empty %}
+                    <li class="text-muted">কোনো সাম্প্রতিক পোস্ট নেই।</li>
+                    {% endfor %}
+                </ul>
+
+                <h4 class="sidebar-heading mt-4">আর্কাইভ</h4>
+                <ul class="list-unstyled archive-list">
+                    {% for date in archive_dates %}
+                    <li>
+                        <a href="#" data-bs-toggle="collapse" data-bs-target="#collapse{{ date.year }}" class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-chevron-right"></i> {{ date.year }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ date.months|length }}</span>
+                        </a>
+                        <ul class="collapse list-unstyled pl-3" id="collapse{{ date.year }}">
+                            {% for month in date.months %}
+                            <li>
+                                <a href="{% url 'blog:archive' date.year month.number %}" class="d-flex justify-content-between align-items-center">
+                                    <span>{{ month.name }}</span>
+                                    <span class="badge bg-secondary rounded-pill">{{ month.count }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    $(document).ready(function() {
-        // রিয়েকশন ফাংশনালিটি
-        $('.reaction-btn').click(function() {
-            var postId = $(this).data('post-id');
-            var reactionType = $(this).data('reaction-type');
-            var button = $(this);
-
-            $.ajax({
-                url: '{% url "blog:react_to_post" 0 %}'.replace('0', postId),
-                type: 'POST',
-                data: {
-                    'reaction_type': reactionType,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    button.find('.reaction-count').text(response.reaction_counts[reactionType]);
-                    if (response.action === 'added') {
-                        button.addClass('active');
-                    } else {
-                        button.removeClass('active');
-                    }
-                }
-            });
-        });
-
-        // শেয়ার ফাংশনালিটি
-        $('.share-btn').click(function() {
-            var postId = $(this).data('post-id');
-            var button = $(this);
-
-            $.ajax({
-                url: '{% url "blog:share_post" 0 %}'.replace('0', postId),
-                type: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    button.find('.share-count').text(response.shares);
-                }
-            });
-        });
-
-        // ট্যাগ ক্লাউড এনিমেশন
-        $('.tag-item').hover(
-            function() {
-                $(this).addClass('tag-hover');
-            },
-            function() {
-                $(this).removeClass('tag-hover');
-            }
-        );
-
-        // আর্কাইভ টগল
-        $('.collapse').on('show.bs.collapse', function () {
-            $(this).prev('a').find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
-        }).on('hide.bs.collapse', function () {
-            $(this).prev('a').find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-        });
-    });
-</script>
+<script src="{% static 'js/blog.js' %}"></script>
 {% endblock %}

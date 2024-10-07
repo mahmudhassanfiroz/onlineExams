@@ -1,8 +1,37 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}ফিডব্যাক জমা দিন | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/feedback.css' %}">
+<style>
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    .rating > input { display: none; }
+    .rating > label {
+        position: relative;
+        width: 1.1em;
+        font-size: 2vw;
+        color: #FFD700;
+        cursor: pointer;
+    }
+    .rating > label::before {
+        content: "\2605";
+        position: absolute;
+        opacity: 0;
+    }
+    .rating > label:hover:before,
+    .rating > label:hover ~ label:before {
+        opacity: 1 !important;
+    }
+    .rating > input:checked ~ label:before {
+        opacity: 1;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -14,7 +43,7 @@
                     <h1 class="mb-0">ফিডব্যাক জমা দিন</h1>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="feedback-form">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="message" class="form-label">আপনার মতামত:</label>
@@ -23,11 +52,11 @@
                         <div class="mb-3">
                             <label for="rating" class="form-label">রেটিং:</label>
                             <div class="rating">
-                                <input type="radio" id="star5" name="rating" value="5" /><label for="star5"></label>
-                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4"></label>
-                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3"></label>
-                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
-                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
+                                <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 তারা"></label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 তারা"></label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 তারা"></label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 তারা"></label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 তারা"></label>
                             </div>
                         </div>
                         <div class="d-grid">
@@ -43,4 +72,16 @@
 
 {% block extra_js %}
 <script src="{% static 'js/feedback.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('feedback-form');
+        form.addEventListener('submit', function(e) {
+            const rating = form.querySelector('input[name="rating"]:checked');
+            if (!rating) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে একটি রেটিং নির্বাচন করুন।');
+            }
+        });
+    });
+</script>
 {% endblock %}

@@ -266,7 +266,7 @@ TINYMCE_DEFAULT_CONFIG = {
 #
 import dj_database_url
 
-# DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
+DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
 
 # সিকিউরিটি সেটিংস
 SECURE_BROWSER_XSS_FILTER = True

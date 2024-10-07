@@ -7,8 +7,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 class Result(models.Model):
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, db_index=True)
+    object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     
     score = models.FloatField()
@@ -34,6 +34,13 @@ class Result(models.Model):
             return f"{self.content_object.user.username}'s result for exam {self.content_object.exam.title}"
         else:
             return f"Result {self.id}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
+
+
 
 class Feedback(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE)

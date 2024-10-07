@@ -113,6 +113,196 @@
 </div>
 <!-- ছাত্র-ছাত্রী প্যাকেজ সেকশন শেষ -->
 
+
+
+<!-- ফিডব্যাক মডাল -->
+{% if user.is_authenticated %}
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="feedbackModalLabel">আপনার মূল্যবান মতামত দিন</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'home' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="feedback_type" value="general">
+                    <div class="mb-3">
+                        <label for="feedbackComment" class="form-label">আপনার ফিডব্যাক</label>
+                        <textarea class="form-control" id="feedbackComment" name="comment" rows="5" placeholder="পরীক্ষার মান, সুযোগ-সুবিধা ইত্যাদি সম্পর্কে আপনার মতামত লিখুন"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>ফিডব্যাক জমা দিন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- সাধারণ ফিডব্যাক সেকশন -->
+<section class="feedback-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">সাম্প্রতিক ফিডব্যাক</h2>
+        <div class="row">
+            {% for feedback in general_feedbacks %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-body">
+                            <p class="card-text">{{ feedback.comment|truncatechars:100 }}</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-2"></i>{{ feedback.user.get_full_name|default:feedback.user.username }}
+                                </small>
+                            </p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt me-2"></i>{{ feedback.created_at|date:"F d, Y" }}
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="text-center text-muted">কোনো সাধারণ ফিডব্যাক নেই।</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ফিডব্যাক বাটন -->
+<div class="text-center my-5">
+    {% if user.is_authenticated %}
+        <button type="button" class="btn btn-primary btn-lg animated-button" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+            <i class="fas fa-comment-alt me-2"></i>ফিডব্যাক দিন
+        </button>
+    {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg animated-button">
+            <i class="fas fa-sign-in-alt me-2"></i>লগইন করে ফিডব্যাক দিন
+        </a>
+    {% endif %}
+</div>
+
+<!-- রেজাল্ট এবং ফিডব্যাক সেকশন -->
+<section class="results-section py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-4">সাম্প্রতিক রেজাল্ট</h2>
+        <div class="row">
+            {% for result in recent_results %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm hover-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">{{ result.content_object.exam.title }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong><i class="fas fa-star me-2"></i>স্কোর:</strong> {{ result.score }}</p>
+                            <p class="mb-2"><strong><i class="fas fa-user me-2"></i>ব্যবহারকারী:</strong> {{ result.content_object.user.get_full_name|default:result.content_object.user.username }}</p>
+                            
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'home' %}" class="mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="feedback_type" value="result">
+                                    <input type="hidden" name="result_id" value="{{ result.id }}">
+                                    <div class="form-group">
+                                        <textarea name="comment" class="form-control" rows="3" placeholder="এই রেজাল্ট সম্পর্কে আপনার ফিডব্যাক লিখুন"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">
+                                        <i class="fas fa-paper-plane me-2"></i>ফিডব্যাক জমা দিন
+                                    </button>
+                                </form>
+                            {% else %}
+                                <p class="mt-2">
+                                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-sign-in-alt me-2"></i>লগইন করুন
+                                    </a> রেজাল্ট ফিডব্যাক দেওয়ার জন্য
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="text-center text-muted">কোনো সাম্প্রতিক রেজাল্ট নেই।</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+<!-- কিভাবে কাজ করে সেকশন -->
+<section class="how-it-works py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">আমাদের পরীক্ষা সাইট কিভাবে আপনাকে সাহায্য করবে</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-book-open fa-3x mb-3 text-primary"></i>
+                        <h4 class="card-title">অনলাইন পরীক্ষা</h4>
+                        <p class="card-text">বিভিন্ন বিষয়ে অনলাইন পরীক্ষা দিয়ে নিজের দক্ষতা যাচাই করুন। যেকোনো সময়, যেকোনো স্থান থেকে পরীক্ষায় অংশগ্রহণ করুন।</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                        <h4 class="card-title">প্রগতি পর্যবেক্ষণ</h4>
+                        <p class="card-text">আপনার পরীক্ষার ফলাফল এবং প্রগতি সহজেই ট্র্যাক করুন। বিস্তারিত বিশ্লেষণের মাধ্যমে আপনার দুর্বল দিকগুলি চিহ্নিত করুন।</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-info"></i>
+                        <h4 class="card-title">সহপাঠীদের সাথে প্রতিযোগিতা</h4>
+                        <p class="card-text">অন্যান্য পরীক্ষার্থীদের সাথে তুলনা করে নিজের অবস্থান জানুন। প্রতিযোগিতামূলক পরিবেশে নিজেকে উন্নত করুন।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-3x mb-3 text-warning"></i>
+                        <h4 class="card-title">লাইভ পরীক্ষা</h4>
+                        <p class="card-text">নির্দিষ্ট সময়ে অনুষ্ঠিত লাইভ পরীক্ষায় অংশগ্রহণ করে বাস্তব পরীক্ষার অনুভূতি পান।</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-comments fa-3x mb-3 text-danger"></i>
+                        <h4 class="card-title">ফিডব্যাক সিস্টেম</h4>
+                        <p class="card-text">পরীক্ষা সম্পর্কে আপনার মতামত জানান। আমরা আপনার ফিডব্যাকের ভিত্তিতে নিরন্তর উন্নতি করছি।</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-graduation-cap fa-3x mb-3 text-primary"></i>
+                        <h4 class="card-title">শিক্ষামূলক রিসোর্স</h4>
+                        <p class="card-text">পরীক্ষার পাশাপাশি বিভিন্ন শিক্ষামূলক রিসোর্স পান, যা আপনার প্রস্তুতিকে আরও শক্তিশালী করবে।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- কিভাবে কাজ করে সেকশন শেষ -->
+
 {% if cta_section %}
 <div class="cta-section bg-primary text-white py-5">
     <div class="container text-center">

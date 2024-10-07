@@ -1,0 +1,15 @@
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">দ্রুত লিঙ্ক</h3>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            <a href="{% url 'exams:exam_list' %}" class="list-group-item list-group-item-action">পরীক্ষা তালিকা</a>
+            <a href="{% url 'results:overview' %}" class="list-group-item list-group-item-action">ফলাফল সারসংক্ষেপ</a>
+            <a href="{% url 'accounts:account_settings' %}" class="list-group-item list-group-item-action">একাউন্ট সেটিংস</a>
+            <a href="{% url 'dashboard:customize_dashboard' %}" class="list-group-item list-group-item-action">ড্যাশবোর্ড কাস্টমাইজ করুন</a>
+            <a href="{% url 'dashboard:submit_feedback' %}" class="list-group-item list-group-item-action">প্রতিক্রিয়া জানান</a>
+        </div>
+    </div>
+</div>

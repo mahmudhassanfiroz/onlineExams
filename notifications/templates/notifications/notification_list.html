@@ -5,7 +5,7 @@
 <ul>
 {% for notification in notifications %}
     <li>
-        <a href="{% url 'notification_detail' notification.id %}">
+        <a href="{% url 'notifications:notification_detail' notification.id %}">
             {{ notification.get_notification_type_display }}: {{ notification.get_stripped_title }}
         </a>
         {% if not notification.is_read %}

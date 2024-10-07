@@ -12,14 +12,42 @@
                     পরীক্ষা: {{ result.content_object.exam.title }}
                 {% endif %}
             </h5>
-            <p class="card-text">স্কোর: {{ result.score }}</p>
-            <p class="card-text">সঠিক উত্তর: {{ result.correct_answers }}</p>
-            <p class="card-text">ভুল উত্তর: {{ result.wrong_answers }}</p>
+            {% if result.score == 0 %}
+                <div class="alert alert-warning">
+                    দুঃখিত, আপনি এই পরীক্ষায় কোনো নম্বর পাননি। আবার চেষ্টা করুন!
+                </div>
+            {% else %}
+                <p class="card-text">স্কোর: {{ result.score }}</p>
+                <p class="card-text">সঠিক উত্তর: {{ result.correct_answers }}</p>
+                <p class="card-text">ভুল উত্তর: {{ result.wrong_answers }}</p>
+                <p class="card-text">শতকরা হার: {{ result.calculate_percentage|floatformat:2 }}%</p>
+            {% endif %}
             <p class="card-text">জমা দেওয়ার সময়: {{ result.submission_time }}</p>
             <a href="{% url 'results:result_analysis' result.id %}" class="btn btn-primary">বিস্তারিত বিশ্লেষণ</a>
             <a href="{% url 'results:generate_pdf' result.id %}" class="btn btn-secondary">PDF ডাউনলোড</a>
         </div>
     </div>
+
+    {% if answers %}
+        <h2 class="mt-4">প্রশ্ন এবং উত্তর</h2>
+        {% for answer in answers %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">প্রশ্ন {{ forloop.counter }}</h5>
+                    <p>{{ answer.question.text }}</p>
+                    <p>আপনার উত্তর: {{ answer.answer_text }}</p>
+                    <p>সঠিক উত্তর: {{ answer.question.correct_answer }}</p>
+                    {% if answer.is_correct %}
+                        <p class="text-success">সঠিক!</p>
+                    {% else %}
+                        <p class="text-danger">ভুল</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="mt-4">কোনো উত্তর পাওয়া যায়নি।</p>
+    {% endif %}
 
     <div class="mt-4">
         <h3>মন্তব্য জমা দিন</h3>

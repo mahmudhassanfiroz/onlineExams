@@ -174,21 +174,21 @@ body {
 }
 
 #notificationCount {
-    font-size: 0.4rem;  /* আকার আরও ছোট করা হয়েছে */
-    width: 0.65rem;     /* প্রস্থ কমানো হয়েছে */
-    height: 0.65rem;    /* উচ্চতা কমানো হয়েছে */
+    font-size: 0.6rem;
+    width: 1rem;
+    height: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     padding: 0;
     position: absolute;
-    top: 0.15rem;       
-    right: -0.2rem;     
+    top: -0.25rem;
+    right: -0.5rem;
     background-color: #dc3545;
     color: white;
     font-weight: bold;
-    line-height: 1;     
+    line-height: 1;
 }
 
 #notificationLink {
@@ -198,6 +198,30 @@ body {
 
 .fa-bell {
     font-size: 1.2rem;
+    color: #f8f9fa;  /* Bootstrap এর হালকা রং */
+    transition: color 0.3s ease;
+}
+
+#notificationLink:hover .fa-bell {
+    color: #ffffff;  /* হোভার করলে সাদা হয়ে যাবে */
+}
+
+/* যদি ন্যাভবার ডার্ক থেমে থাকে তবে এই স্টাইল ব্যবহার করুন */
+.navbar-dark .fa-bell {
+    color: #f8f9fa;
+}
+
+.navbar-dark #notificationLink:hover .fa-bell {
+    color: #ffffff;
+}
+
+/* যদি ন্যাভবার লাইট থেমে থাকে তবে এই স্টাইল ব্যবহার করুন */
+.navbar-light .fa-bell {
+    color: #6c757d;  /* Bootstrap এর মাঝারি ধূসর রং */
+}
+
+.navbar-light #notificationLink:hover .fa-bell {
+    color: #343a40;  /* হোভার করলে গাঢ় হয়ে যাবে */
 }
 
 .ad-placeholder {
@@ -208,4 +232,18 @@ body {
     align-items: center;
     margin-bottom: 20px;
     overflow: hidden;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.animated-button {
+    transition: all 0.3s ease;
+}
+
+.animated-button:hover {
+    transform: scale(1.05);
 }

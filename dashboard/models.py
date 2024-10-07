@@ -35,15 +35,36 @@ class UserActivity(models.Model):
         return f"{self.user.name} - {self.activity_type}"
 
 class UserPreference(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='preferences')
-    dashboard_layout = models.JSONField(_("ড্যাশবোর্ড লেআউট"), default=dict)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
-    class Meta:
-        verbose_name = _("ব্যবহারকারী পছন্দ")
-        verbose_name_plural = _("ব্যবহারকারী পছন্দসমূহ")
+    LAYOUT_CHOICES = [
+        ('default', _('ডিফল্ট')),
+        ('compact', _('কম্প্যাক্ট')),
+        ('wide', _('প্রশস্ত')),
+    ]
+    dashboard_layout = models.CharField(
+        max_length=20,
+        choices=LAYOUT_CHOICES,
+        default='default',
+        verbose_name=_("ড্যাশবোর্ড লেআউট")
+    )
+
+    COLOR_SCHEME_CHOICES = [
+        ('light', _('হালকা')),
+        ('dark', _('গাঢ়')),
+        ('blue', _('নীল')),
+    ]
+    color_scheme = models.CharField(
+        max_length=20,
+        choices=COLOR_SCHEME_CHOICES,
+        default='light',
+        verbose_name=_("কালার স্কিম")
+    )
+
+    widget_order = models.JSONField(default=list, verbose_name=_("উইজেট অর্ডার"))
 
     def __str__(self):
-        return f"{self.user.name}'s পছন্দসমূহ"
+        return f"{self.user.username}'s preferences"
 
 class Badge(models.Model):
     name = models.CharField(_("নাম"), max_length=100)

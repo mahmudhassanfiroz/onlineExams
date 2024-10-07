@@ -5,5 +5,5 @@
 <h2>{{ notification.get_stripped_title }}</h2>
 <p>{{ notification.get_stripped_message }}</p>
 <p>প্রাপ্তির সময়: {{ notification.created_at }}</p>
-<a href="{% url 'notification_list' %}">সব নোটিফিকেশন দেখুন</a>
+<a href="{% url 'notifications:notification_list' %}">সব নোটিফিকেশন দেখুন</a>
 {% endblock %}

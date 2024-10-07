@@ -1,0 +1,18 @@
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">আসন্ন পরীক্ষা</h3>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+        {% for exam in upcoming_exams %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ exam.title }}
+                <span class="badge bg-primary rounded-pill">{{ exam.start_time|date:"d/m/Y H:i" }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">কোনো আসন্ন পরীক্ষা নেই।</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>

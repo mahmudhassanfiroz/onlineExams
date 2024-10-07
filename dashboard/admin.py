@@ -6,12 +6,6 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'batch')
     search_fields = ('user__username', 'batch__name')
 
-# @admin.register(Notification)
-# class NotificationAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'message', 'created_at', 'is_read')
-#     list_filter = ('is_read', 'created_at')
-#     search_fields = ('user__username', 'message')
-
 @admin.register(UserActivity)
 class UserActivityAdmin(admin.ModelAdmin):
     list_display = ('user', 'activity_type', 'created_at')

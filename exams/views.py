@@ -4,10 +4,11 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
 from .models import Exam, UserExam, UserAnswer, Question
-from services.models import UserPackage
+from services.models import ExamCategory, UserPackage
 
 def exam_list(request):
     exams = Exam.objects.all()
+    categories = ExamCategory.objects.all()  # সব ক্যাটাগরি নিয়ে আসা হচ্ছে
     query = request.GET.get('q')
     category = request.GET.get('category')
     difficulty = request.GET.get('difficulty')
@@ -21,11 +22,13 @@ def exam_list(request):
 
     context = {
         'exams': exams,
+        'categories': categories,  # ক্যাটাগরিগুলো কনটেক্সটে যোগ করা হচ্ছে
         'query': query,
         'selected_category': category,
         'selected_difficulty': difficulty,
     }
     return render(request, 'exams/exam_list.html', context)
+
 
 @login_required
 def exam_detail(request, slug):

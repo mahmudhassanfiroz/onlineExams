@@ -2,6 +2,8 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
+{% block title %}প্রোফাইল আপডেট | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
@@ -15,7 +17,7 @@
                     <h2 class="mb-0">প্রোফাইল আপডেট করুন</h2>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="update-profile-form">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -55,4 +57,31 @@
 
 {% block extra_js %}
 <script src="{% static 'js/profile.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('update-profile-form');
+        const fileInput = form.querySelector('input[type="file"]');
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.querySelector('.img-thumbnail');
+                    if (img) {
+                        img.src = e.target.result;
+                    } else {
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.alt = 'নতুন প্রোফাইল ছবি';
+                        newImg.className = 'img-thumbnail';
+                        newImg.style.maxWidth = '200px';
+                        fileInput.parentNode.appendChild(newImg);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
 {% endblock %}

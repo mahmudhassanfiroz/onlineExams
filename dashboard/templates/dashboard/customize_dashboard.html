@@ -14,7 +14,7 @@
                     <h1 class="mb-0">ড্যাশবোর্ড কাস্টমাইজ করুন</h1>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" id="customizationForm">
                         {% csrf_token %}
                         <div class="form-group mb-4">
                             <label for="layout" class="form-label">লেআউট নির্বাচন করুন:</label>
@@ -24,12 +24,34 @@
                                 <option value="expanded" {% if current_layout == 'expanded' %}selected{% endif %}>বিস্তৃত</option>
                             </select>
                         </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="color_scheme" class="form-label">কালার স্কিম নির্বাচন করুন:</label>
+                            <select name="color_scheme" id="color_scheme" class="form-select">
+                                <option value="light" {% if current_color_scheme == 'light' %}selected{% endif %}>হালকা</option>
+                                <option value="dark" {% if current_color_scheme == 'dark' %}selected{% endif %}>গাঢ়</option>
+                                <option value="blue" {% if current_color_scheme == 'blue' %}selected{% endif %}>নীল</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">উইজেট অর্ডার:</label>
+                            <div id="widget-order" class="list-group">
+                                <div class="list-group-item" draggable="true" data-widget="recent_activity">সাম্প্রতিক কার্যক্রম</div>
+                                <div class="list-group-item" draggable="true" data-widget="upcoming_exams">আসন্ন পরীক্ষা</div>
+                                <div class="list-group-item" draggable="true" data-widget="performance_metrics">পারফরম্যান্স মেট্রিক্স</div>
+                                <div class="list-group-item" draggable="true" data-widget="notifications">বিজ্ঞপ্তি</div>
+                            </div>
+                            <input type="hidden" name="widget_order" id="widget_order_input">
+                        </div>
+                        
                         <div class="layout-preview mb-4">
                             <h4>লেআউট প্রিভিউ:</h4>
                             <div id="layout-preview-container" class="border p-3">
                                 <!-- প্রিভিউ কন্টেন্ট JavaScript দ্বারা আপডেট হবে -->
                             </div>
                         </div>
+                        
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg">সংরক্ষণ করুন</button>
                         </div>

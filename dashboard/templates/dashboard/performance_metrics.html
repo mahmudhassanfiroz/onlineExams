@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}পারফরম্যান্স মেট্রিক্স | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/performance_metrics.css' %}">
+<style>
+    .progress-bar {
+        transition: width 0.6s ease;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -57,34 +64,36 @@
                     <h3 class="card-title mb-0">সাম্প্রতিক পরীক্ষার ফলাফল</h3>
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>পরীক্ষার নাম</th>
-                                <th>তারিখ</th>
-                                <th>স্কোর</th>
-                                <th>শতকরা হার</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in recent_results %}
-                            <tr>
-                                <td>{{ result.exam_name }}</td>
-                                <td>{{ result.date }}</td>
-                                <td>{{ result.score }}</td>
-                                <td>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: {{ result.percentage }}%;" aria-valuenow="{{ result.percentage }}" aria-valuemin="0" aria-valuemax="100">{{ result.percentage }}%</div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">কোনো সাম্প্রতিক পরীক্ষার ফলাফল নেই।</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>পরীক্ষার নাম</th>
+                                    <th>তারিখ</th>
+                                    <th>স্কোর</th>
+                                    <th>শতকরা হার</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in recent_results %}
+                                <tr>
+                                    <td>{{ result.exam_name }}</td>
+                                    <td>{{ result.date }}</td>
+                                    <td>{{ result.score }}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%;" data-width="{{ result.percentage }}" aria-valuenow="{{ result.percentage }}" aria-valuemin="0" aria-valuemax="100">{{ result.percentage }}%</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">কোনো সাম্প্রতিক পরীক্ষার ফলাফল নেই।</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,4 +103,16 @@
 
 {% block extra_js %}
 <script src="{% static 'js/performance_metrics.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.getAttribute('data-width');
+            setTimeout(() => {
+                bar.style.width = width + '%';
+            }, 100);
+        });
+    });
+</script>
 {% endblock %}
+
