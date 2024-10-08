@@ -63,12 +63,12 @@ def book_purchase_notification(sender, instance, created, **kwargs):
             'message': f"আপনি সফলভাবে '{instance.title}' বইটি ক্রয় করেছেন।"
         })
 
-@receiver(post_save, sender=Package)
+@receiver(post_save, sender=UserPackage)
 def package_purchase_notification(sender, instance, created, **kwargs):
-    if instance.is_purchased and not created:
-        send_notification(instance.user, 'package_purchase', instance, {
+    if created:
+        send_notification(instance.user, 'package_purchase', instance.package, {
             'title': "প্যাকেজ ক্রয় সম্পন্ন",
-            'message': f"আপনি সফলভাবে {instance.name} প্যাকেজটি ক্রয় করেছেন।"
+            'message': f"আপনি সফলভাবে {instance.package.name} প্যাকেজটি ক্রয় করেছেন।"
         })
 
 def check_upcoming_exams():
