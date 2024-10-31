@@ -280,9 +280,11 @@ SESSION_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
 # ক্যাশিং কনফিগারেশন (অপশনাল)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION':  'onlineexams-firoz.onrender.com',
     }
 }
+
 
 # লগিং কনফিগারেশন (অপশনাল)
 LOGGING = {
