@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load services_tags %}
+{% load render_packages %}
+
 
 {% block content %}
 <!-- মার্কি নোটিশ শুরু -->
@@ -52,7 +54,7 @@
 <!-- ক্যারোসেল শেষ -->
 
 <!-- প্যাকেজ সেকশন -->
-{% macro render_packages(title, packages, bg_color, btn_color) %}
+{% comment %} {% render_packages render_packages(title, packages, bg_color, btn_color) %}
 <div class="py-5 {{ bg_color }}">
     <div class="container">
         <h2 class="text-center mb-5">{{ title }}</h2>
@@ -81,10 +83,10 @@
         </div>
     </div>
 </div>
-{% endmacro %}
+{% render_packagesend %} {% endcomment %}
 
-{{ render_packages("কোচিং প্যাকেজসমূহ", coaching_packages, "bg-light", "bg-success") }}
-{{ render_packages("ছাত্র-ছাত্রীদের জন্য প্যাকেজসমূহ", student_packages, "bg-light", "bg-info") }}
+{% render_packages "কোচিং প্যাকেজসমূহ" coaching_packages "bg-light" "bg-success" %}
+{% render_packages "ছাত্র-ছাত্রীদের জন্য প্যাকেজসমূহ" student_packages "bg-light" "bg-info" %}
 
 <!-- ফিডব্যাক মডাল -->
 {% if user.is_authenticated %}
