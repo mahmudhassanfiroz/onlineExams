@@ -278,12 +278,6 @@ X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
 SESSION_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
 
-# ক্যাশিং কনফিগারেশন (অপশনাল)
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#     }
-# }
 
 # ক্যাশ কনফিগারেশন
 if os.environ.get('DJANGO_ENV') == 'production':  # রেন্ডারে
@@ -300,6 +294,7 @@ else:  # লোকাল ডেভেলপমেন্টে
             'LOCATION': '127.0.0.1:8000',
         }
     }
+
 
 # লগিং কনফিগারেশন (অপশনাল)
 LOGGING = {
