@@ -70,7 +70,7 @@ TEMPLATES = [
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
-            'environment': 'myproject.jinja2.environment',  # আপনার পরিবেশ
+            'environment': 'online_job_exam.jinja2.environment',  # আপনার পরিবেশ
         },
     },
 
