@@ -16,7 +16,7 @@ from django.dispatch import receiver
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, name, password=None, **extra_fields):
         if not email:
-            raise ValueError(_("ইমেইল ঠিকানা অবশ্যই প্রদান করতে হবে"))
+            raise ValueError(_("Email address must be provided"))
         email = self.normalize_email(email)
         user = self.model(email=email, name=name, **extra_fields)
         user.set_password(password)
@@ -29,37 +29,37 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
 
         if extra_fields.get('is_staff') is not True:
-            raise ValueError(_('সুপারইউজার অবশ্যই is_staff=True হতে হবে।'))
+            raise ValueError(_('Superuser must have is_staff=True.'))
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError(_('সুপারইউজার অবশ্যই is_superuser=True হতে হবে।'))
+            raise ValueError(_('Superuser must have is_superuser=True.'))
 
         return self.create_user(email, name, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(
-        _("ব্যবহারকারীর নাম"),
+        _("Username"),
         max_length=150,
         unique=True,
         blank=True,
         null=True
     )
-    first_name = models.CharField(_("নামের প্রথম অংশ"), max_length=30, blank=True)
-    last_name = models.CharField(_("নামের শেষ অংশ"), max_length=150, blank=True)
-    name = models.CharField(_("পূর্ণ নাম"), max_length=255)
-    email = models.EmailField(_("ইমেইল ঠিকানা"), unique=True, max_length=255)
+    first_name = models.CharField(_("First Name"), max_length=30, blank=True)
+    last_name = models.CharField(_("Last Name"), max_length=150, blank=True)
+    name = models.CharField(_("Full Name"), max_length=255)
+    email = models.EmailField(_("Email Address"), unique=True, max_length=255)
     mobile_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',
-        message=_("মোবাইল নম্বর এই ফরম্যাটে হতে হবে: '+999999999'. সর্বোচ্চ 15 ডিজিট অনুমোদিত।")
+        message=_("Mobile number must be in the format: '+999999999'. Up to 15 digits allowed.")
     )
-    mobile = models.CharField(_("মোবাইল নম্বর"), validators=[mobile_regex], max_length=17, blank=True, null=True, unique=True)
-    profile_image = models.ImageField(_("প্রোফাইল ছবি"), upload_to='profile_images/', null=True, blank=True)
+    mobile = models.CharField(_("Mobile Number"), validators=[mobile_regex], max_length=17, blank=True, null=True, unique=True)
+    profile_image = models.ImageField(_("Profile Picture"), upload_to='profile_images/', null=True, blank=True)
     
-    is_staff = models.BooleanField(_("স্টাফ স্ট্যাটাস"), default=False)
-    is_active = models.BooleanField(_("সক্রিয়"), default=True)
-    is_email_verified = models.BooleanField(_("ইমেইল যাচাইকৃত"), default=False)
-    date_joined = models.DateTimeField(_("যোগদানের তারিখ"), default=timezone.now)
-    last_login = models.DateTimeField(_("শেষ লগইন"), blank=True, null=True)
+    is_staff = models.BooleanField(_("Staff Status"), default=False)
+    is_active = models.BooleanField(_("Active"), default=True)
+    is_email_verified = models.BooleanField(_("Email Verified"), default=False)
+    date_joined = models.DateTimeField(_("Date Joined"), default=timezone.now)
+    last_login = models.DateTimeField(_("Last Login"), blank=True, null=True)
 
     objects = CustomUserManager()
 
@@ -67,8 +67,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['name']
 
     class Meta:
-        verbose_name = _("ব্যবহারকারী")
-        verbose_name_plural = _("ব্যবহারকারীগণ")
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
         ordering = ['-date_joined']
 
     def __str__(self):
@@ -93,12 +93,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     @property
     def profile(self):
-        # লেইজি লোডিং ব্যবহার করুন
+        # Use lazy loading
         from dashboard.models import UserProfile
         return UserProfile.objects.get_or_create(user=self)[0]
 
-
-# সিগন্যাল ফাংশনটি পরিবর্তন করুন
+# Change the signal function
 @receiver(post_save, sender=CustomUser)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     from dashboard.models import UserProfile
@@ -107,16 +106,15 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     else:
         UserProfile.objects.get_or_create(user=instance)[0].save()
 
-
 class LoginHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='login_history')
-    login_datetime = models.DateTimeField(_("লগইন সময়"), auto_now_add=True)
-    ip_address = models.GenericIPAddressField(_("আইপি ঠিকানা"))
-    user_agent = models.TextField(_("ইউজার এজেন্ট"))
+    login_datetime = models.DateTimeField(_("Login Time"), auto_now_add=True)
+    ip_address = models.GenericIPAddressField(_("IP Address"))
+    user_agent = models.TextField(_("User Agent"))
 
     class Meta:
-        verbose_name = _("লগইন ইতিহাস")
-        verbose_name_plural = _("লগইন ইতিহাসসমূহ")
+        verbose_name = _("Login History")
+        verbose_name_plural = _("Login Histories")
         ordering = ['-login_datetime']
 
     def __str__(self):

@@ -1,24 +1,27 @@
 .card {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    margin-bottom: 20px; /* Adding margin to maintain space between cards */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s; /* Specify property for clarity */
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
     background-color: #007bff;
-    color: white;
+    color: #fff; /* Use hex shorthand for white */
     font-weight: bold;
 }
 
 .btn-primary {
     background-color: #007bff;
-    border-color: #007bff;
+    border: none; /* Remove border for cleaner look */
+    color: #fff; /* Ensure text color contrasts with background */
+    transition: background-color 0.3s, border-color 0.3s; /* Add transition for hover effect */
 }
 
 .btn-primary:hover {
     background-color: #0056b3;
-    border-color: #0056b3;
+    border-color: #0056b3; /* This can be omitted if border is set to none */
 }

@@ -2,25 +2,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
-from django.utils import timezone
-from sslcommerz_lib.sslcommerz import SSLCOMMERZ
-from django.conf import settings
 from .models import Package, UserPackage
-from exams.models import Exam, ExamCategory
-from services.models import Package
-from payments.models import Payment
+from exams.models import Exam
 from django.db.models import Prefetch
-
 
 def package_detail(request, slug):
     package = get_object_or_404(Package, slug=slug)
     
-    exam_categories = package.exam_categories.all()
-    exams_by_category = {}
-    
-    for category in exam_categories:
-        exams = Exam.objects.filter(exam_category=category)
-        exams_by_category[category] = exams
+    exams_by_category = {
+        category: Exam.objects.filter(exam_category=category)
+        for category in package.exam_categories.all()
+    }
 
     context = {
         'package': package,
@@ -28,18 +20,12 @@ def package_detail(request, slug):
     }
     return render(request, 'services/package_detail.html', context)
 
-
 @login_required
 def purchase_package(request, slug):
     package = get_object_or_404(Package, slug=slug)
     
-    try:
-        messages.info(request, f'{package.name} প্যাকেজের জন্য পেমেন্ট প্রক্রিয়া শুরু হচ্ছে।')
-        return redirect('payments:initiate_payment', item_type='PACKAGE', item_id=package.id)
-    except Exception as e:
-        messages.error(request, f'পেমেন্ট শুরু করতে সমস্যা হয়েছে: {str(e)}')
-        return redirect('services:package_detail', slug=slug)
-
+    messages.info(request, f'{package.name} প্যাকেজের জন্য পেমেন্ট প্রক্রিয়া শুরু হচ্ছে।')
+    return redirect('payments:initiate_payment', item_type='PACKAGE', item_id=package.id)
 
 @login_required
 def user_packages(request):
@@ -57,3 +43,4 @@ def search_packages(request):
         'query': query,
     }
     return render(request, 'services/search_packages.html', context)
+

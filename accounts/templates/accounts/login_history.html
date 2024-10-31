@@ -1,32 +1,54 @@
-
 {% extends 'base.html' %}
 
-{% block title %}লগইন ইতিহাস - {{ block.super }}{% endblock %}
+{% block title %}Login History - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4">লগইন ইতিহাস</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Login History</h2>
+    
+    {% if login_history %}
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>তারিখ ও সময়</th>
-                <th>IP ঠিকানা</th>
-                <th>ডিভাইস/ব্রাউজার</th>
+                <th>Date & Time</th>
+                <th>IP Address</th>
+                <th>Device/Browser</th>
             </tr>
         </thead>
         <tbody>
             {% for login in login_history %}
             <tr>
-                <td>{{ login.login_datetime }}</td>
+                <td>{{ login.login_datetime|date:"Y-m-d H:i:s" }}</td>
                 <td>{{ login.ip_address }}</td>
-                <td>{{ login.user_agent }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">কোনো লগইন ইতিহাস পাওয়া যায়নি।</td>
+                <td>{{ login.user_agent|truncatechars:30 }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <!-- Pagination controls -->
+    <div class="d-flex justify-content-center">
+        <nav>
+            <ul class="pagination">
+                {% if login_history.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ login_history.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                {% for page_num in login_history.paginator.page_range %}
+                <li class="page-item {% if login_history.number == page_num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+                {% if login_history.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ login_history.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% else %}
+    <p class="text-center">No login history found.</p>
+    {% endif %}
 </div>
 {% endblock %}

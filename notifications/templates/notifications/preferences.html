@@ -4,38 +4,14 @@
 <h1>নোটিফিকেশন সেটিংস</h1>
 <form method="post">
     {% csrf_token %}
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="live_exam" name="live_exam" {% if preference.live_exam %}checked{% endif %}>
-        <label class="form-check-label" for="live_exam">লাইভ পরীক্ষা</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="exam_result" name="exam_result" {% if preference.exam_result %}checked{% endif %}>
-        <label class="form-check-label" for="exam_result">পরীক্ষার ফলাফল</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="blog_post" name="blog_post" {% if preference.blog_post %}checked{% endif %}>
-        <label class="form-check-label" for="blog_post">ব্লগ পোস্ট</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="book_purchase" name="book_purchase" {% if preference.book_purchase %}checked{% endif %}>
-        <label class="form-check-label" for="book_purchase">বই ক্রয়</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="general_info" name="general_info" {% if preference.general_info %}checked{% endif %}>
-        <label class="form-check-label" for="general_info">সাধারণ তথ্য</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="upcoming_exam" name="upcoming_exam" {% if preference.upcoming_exam %}checked{% endif %}>
-        <label class="form-check-label" for="upcoming_exam">আসন্ন পরীক্ষা</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="login" name="login" {% if preference.login %}checked{% endif %}>
-        <label class="form-check-label" for="login">লগইন</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="package_purchase" name="package_purchase" {% if preference.package_purchase %}checked{% endif %}>
-        <label class="form-check-label" for="package_purchase">প্যাকেজ ক্রয়</label>
-    </div>
+    {% for field in preference._meta.get_fields %}
+        {% if field.name in "live_exam exam_result blog_post book_purchase general_info upcoming_exam login package_purchase" %}
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="{{ field.name }}" name="{{ field.name }}" {% if preference|getattr:field.name %}checked{% endif %}>
+                <label class="form-check-label" for="{{ field.name }}">{{ field.verbose_name }}</label>
+            </div>
+        {% endif %}
+    {% endfor %}
     <button type="submit" class="btn btn-primary">সেটিংস সংরক্ষণ করুন</button>
 </form>
 {% endblock %}

@@ -14,6 +14,7 @@ from sslcommerz_lib import SSLCOMMERZ
 
 @login_required
 def initiate_payment(request, item_type, item_id):
+    item = None
     if item_type == 'PACKAGE':
         item = get_object_or_404(Package, id=item_id)
     elif item_type == 'BOOK':
@@ -31,17 +32,6 @@ def initiate_payment(request, item_type, item_id):
         package=item if item_type == 'PACKAGE' else None
     )
 
-
-    if not payment:
-        payment = Payment.objects.create(
-            user=request.user,
-            amount=item.price,
-            payment_type=item_type,
-            tran_id=f"{item_type}-{item.id}-{timezone.now().timestamp()}",
-            book=item if item_type == 'BOOK' else None,
-            package=item if item_type == 'PACKAGE' else None
-        )
-
     mobile = request.user.mobile or "01700000000"  # ডিফল্ট নম্বর
 
     sslcz = SSLCOMMERZ({
@@ -49,6 +39,7 @@ def initiate_payment(request, item_type, item_id):
         'store_pass': SSLCZ_STORE_PASSWORD,
         'issandbox': SSLCZ_IS_SANDBOX
     })
+    
     post_body = {
         'total_amount': float(payment.amount),
         'currency': "BDT",
@@ -71,22 +62,15 @@ def initiate_payment(request, item_type, item_id):
 
     try:
         response = sslcz.createSession(post_body)
-        if 'status' in response and response['status'] == 'SUCCESS':
-            if 'GatewayPageURL' in response and response['GatewayPageURL']:
-                return redirect(response['GatewayPageURL'])
-            else:
-                messages.error(request, 'পেমেন্ট গেটওয়ে URL পাওয়া যায়নি।')
+        if response.get('status') == 'SUCCESS' and response.get('GatewayPageURL'):
+            return redirect(response['GatewayPageURL'])
         else:
             error_message = response.get('failedreason', 'অজানা ত্রুটি ঘটেছে।')
             messages.error(request, f'পেমেন্ট সেশন তৈরি করতে ব্যর্থ: {error_message}')
     except Exception as e:
         messages.error(request, f'একটি ত্রুটি ঘটেছে: {str(e)}')
 
-    if item_type == 'PACKAGE':
-        return redirect('services:package_detail', slug=item.slug)
-    else:
-        return redirect('books:book_detail', book_id=item.id)
-
+    return redirect('services:package_detail', slug=item.slug) if item_type == 'PACKAGE' else redirect('books:book_detail', book_id=item.id)
 
 @login_required
 def payment_success(request):
@@ -132,8 +116,7 @@ def payment_cancel(request):
 @login_required
 def payment_details(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id, user=request.user)
-    context = {'payment': payment}
-    return render(request, 'payments/payment_details.html', context)
+    return render(request, 'payments/payment_details.html', {'payment': payment})
 
 @login_required
 @require_POST

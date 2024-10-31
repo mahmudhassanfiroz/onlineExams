@@ -14,19 +14,21 @@
             </tr>
         </thead>
         <tbody>
-            {% for refund in refunds %}
-            <tr>
-                <td>{{ refund.payment.tran_id }}</td>
-                <td>{{ refund.payment.amount }} টাকা</td>
-                <td>{{ refund.created_at }}</td>
-                <td>{{ refund.get_status_display }}</td>
-                <td>{{ refund.reason }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">কোনো রিফান্ড অনুরোধ নেই</td>
-            </tr>
-            {% endfor %}
+            {% if refunds %}
+                {% for refund in refunds %}
+                <tr>
+                    <td>{{ refund.payment.tran_id }}</td>
+                    <td>{{ refund.payment.amount }} টাকা</td>
+                    <td>{{ refund.created_at }}</td>
+                    <td>{{ refund.get_status_display }}</td>
+                    <td>{{ refund.reason }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">কোনো রিফান্ড অনুরোধ নেই</td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
 </div>

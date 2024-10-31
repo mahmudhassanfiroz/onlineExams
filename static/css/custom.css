@@ -1,4 +1,16 @@
+/* General Styles */
+body {
+    background-color: #f8f9fa;
+    padding-top: 56px; /* Navbar height */
+}
 
+@media (min-width: 992px) {
+    body {
+        padding-top: 72px; /* Navbar height for larger screens */
+    }
+}
+
+/* Sticky Navigation */
 #sticky-nav {
     position: fixed;
     top: 0;
@@ -7,18 +19,9 @@
     transition: top 0.3s;
 }
 
-body {
-    padding-top: 56px; /* নেভিগেশন বারের উচ্চতার সমান */
-}
-
-@media (min-width: 992px) {
-    body {
-        padding-top: 72px; /* বড় স্ক্রিনে নেভিগেশন বারের উচ্চতা বেশি হলে */
-    }
-}
-
+/* Carousel Styles */
 .carousel-item {
-    height: 500px; /* আপনার প্রয়োজন অনুযায়ী সামঞ্জস্য করুন */
+    height: 500px; /* Adjust as needed */
 }
 
 .carousel-item img {
@@ -32,6 +35,7 @@ body {
     border-radius: 10px;
 }
 
+/* Marquee Notice */
 .marquee-notice {
     overflow: hidden;
 }
@@ -50,13 +54,14 @@ body {
     text-decoration: underline;
 }
 
+/* Service Packages */
 .service-packages .card {
     transition: transform 0.3s;
 }
 
 .service-packages .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .service-packages .card-header {
@@ -72,6 +77,11 @@ body {
     margin-bottom: 10px;
 }
 
+/* FAQ Section */
+.faq-section .accordion-button {
+    transition: background-color 0.3s;
+}
+
 .faq-section .accordion-button:not(.collapsed) {
     background-color: #007bff;
     color: white;
@@ -79,7 +89,7 @@ body {
 
 .faq-section .accordion-button:focus {
     box-shadow: none;
-    border-color: rgba(0,0,0,.125);
+    border-color: rgba(0, 0, 0, .125);
 }
 
 .faq-section .accordion-button:not(.collapsed)::after {
@@ -90,36 +100,12 @@ body {
     background-color: #f8f9fa;
 }
 
-body {
-    background-color: #f8f9fa;
-}
-
-.book-cover {
-    transition: transform 0.3s ease-in-out;
-}
-
-.book-cover:hover {
-    transform: scale(1.05);
-}
-
-.review-card {
-    transition: box-shadow 0.3s ease-in-out;
-}
-
-.review-card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-.star-rating {
-    color: #ffc107;
-}
-
-
-.book-card {
+/* Book and Review Cards */
+.book-card, .review-card {
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
-.book-card:hover {
+.book-card:hover, .review-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
@@ -133,6 +119,7 @@ body {
     height: 300px;
 }
 
+/* Search Form */
 .search-form {
     background-color: #fff;
     padding: 20px;
@@ -140,39 +127,13 @@ body {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
-.sidebar {
+/* Sidebar */
+.sidebar, .sidebar-sticky {
     position: sticky;
     top: 20px;
 }
 
-.post-card {
-    transition: box-shadow 0.3s ease-in-out;
-}
-
-.post-card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-.tags .badge {
-    margin-right: 5px;
-    margin-bottom: 5px;
-}
-
-.sidebar-sticky {
-    position: sticky;
-    top: 20px;
-}
-
-.dropdown-submenu {
-    position: relative;
-}
-
-.dropdown-submenu .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-top: -1px;
-}
-
+/* Notification Styles */
 #notificationCount {
     font-size: 0.6rem;
     width: 1rem;
@@ -181,14 +142,12 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    padding: 0;
     position: absolute;
     top: -0.25rem;
     right: -0.5rem;
     background-color: #dc3545;
     color: white;
     font-weight: bold;
-    line-height: 1;
 }
 
 #notificationLink {
@@ -198,32 +157,26 @@ body {
 
 .fa-bell {
     font-size: 1.2rem;
-    color: #f8f9fa;  /* Bootstrap এর হালকা রং */
+    color: #f8f9fa; /* Light color for Bootstrap */
     transition: color 0.3s ease;
 }
 
 #notificationLink:hover .fa-bell {
-    color: #ffffff;  /* হোভার করলে সাদা হয়ে যাবে */
+    color: #ffffff; /* Change to white on hover */
 }
 
-/* যদি ন্যাভবার ডার্ক থেমে থাকে তবে এই স্টাইল ব্যবহার করুন */
-.navbar-dark .fa-bell {
-    color: #f8f9fa;
+/* Navbar Icon Colors */
+.navbar-dark .fa-bell,
+.navbar-light .fa-bell {
+    transition: color 0.3s ease;
 }
 
-.navbar-dark #notificationLink:hover .fa-bell {
+.navbar-dark #notificationLink:hover .fa-bell,
+.navbar-light #notificationLink:hover .fa-bell {
     color: #ffffff;
 }
 
-/* যদি ন্যাভবার লাইট থেমে থাকে তবে এই স্টাইল ব্যবহার করুন */
-.navbar-light .fa-bell {
-    color: #6c757d;  /* Bootstrap এর মাঝারি ধূসর রং */
-}
-
-.navbar-light #notificationLink:hover .fa-bell {
-    color: #343a40;  /* হোভার করলে গাঢ় হয়ে যাবে */
-}
-
+/* Ad Placeholder */
 .ad-placeholder {
     min-height: 100px;
     background-color: #f0f0f0;
@@ -231,19 +184,54 @@ body {
     justify-content: center;
     align-items: center;
     margin-bottom: 20px;
-    overflow: hidden;
 }
 
+/* Hover Card Effect */
 .hover-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
+/* Animated Button */
 .animated-button {
     transition: all 0.3s ease;
 }
 
 .animated-button:hover {
     transform: scale(1.05);
+}
+
+/* Rating Styles */
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating > input {
+    display: none;
+}
+
+.rating > label {
+    position: relative;
+    width: 1.1em;
+    font-size: 2vw;
+    color: #FFD700;
+    cursor: pointer;
+}
+
+.rating > label::before {
+    content: "\2605";
+    position: absolute;
+    opacity: 0;
+}
+
+.rating > label:hover:before,
+.rating > label:hover ~ label:before {
+    opacity: 1 !important;
+}
+
+.rating > input:checked ~ label:before {
+    opacity: 1;
 }

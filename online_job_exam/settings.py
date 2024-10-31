@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from decouple import config
+from django.core.cache import caches
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -278,11 +279,27 @@ CSRF_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
 SESSION_COOKIE_SECURE = True  # HTTPS এ শুধুমাত্র
 
 # ক্যাশিং কনফিগারেশন (অপশনাল)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#     }
+# }
+
+# ক্যাশ কনফিগারেশন
+if os.environ.get('DJANGO_ENV') == 'production':  # রেন্ডারে
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+            'LOCATION': 'onlineexams-firoz.onrender.com',
+        }
     }
-}
+else:  # লোকাল ডেভেলপমেন্টে
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': '127.0.0.1:8000',
+        }
+    }
 
 # লগিং কনফিগারেশন (অপশনাল)
 LOGGING = {

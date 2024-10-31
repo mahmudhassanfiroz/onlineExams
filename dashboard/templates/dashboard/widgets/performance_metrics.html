@@ -1,26 +1,15 @@
-
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">পারফরম্যান্স মেট্রিক্স</h3>
     </div>
     <div class="card-body">
         <div class="row">
+            {% for metric, value, label in [('মোট পরীক্ষা', data.total_exams, 'মোট পরীক্ষা'), ('গড় স্কোর', data.avg_score|stringformat:"%.2f"|add:"%" , 'গড় স্কোর'), ('সঠিক উত্তর', data.correct_answers, 'সঠিক উত্তর'), ('ভুল উত্তর', data.wrong_answers, 'ভুল উত্তর')] %}
             <div class="col-md-3 text-center">
-                <h4>{{ data.total_exams }}</h4>
-                <p>মোট পরীক্ষা</p>
+                <h4>{{ value }}</h4>
+                <p>{{ label }}</p>
             </div>
-            <div class="col-md-3 text-center">
-                <h4>{{ data.avg_score }}%</h4>
-                <p>গড় স্কোর</p>
-            </div>
-            <div class="col-md-3 text-center">
-                <h4>{{ data.correct_answers }}</h4>
-                <p>সঠিক উত্তর</p>
-            </div>
-            <div class="col-md-3 text-center">
-                <h4>{{ data.wrong_answers }}</h4>
-                <p>ভুল উত্তর</p>
-            </div>
+            {% endfor %}
         </div>
         <div class="text-center mt-3">
             <a href="{% url 'dashboard:performance_analysis' %}" class="btn btn-info">বিস্তারিত পারফরম্যান্স বিশ্লেষণ</a>

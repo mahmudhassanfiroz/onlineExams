@@ -20,24 +20,11 @@
                     <form method="post" enctype="multipart/form-data" id="update-profile-form">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form.first_name|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form.last_name|as_crispy_field }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            {{ form.email|as_crispy_field }}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.phone_number|as_crispy_field }}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.bio|as_crispy_field }}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.profile_picture|as_crispy_field }}
+                            {% for field in form %}
+                                <div class="col-md-6 mb-3">
+                                    {{ field|as_crispy_field }}
+                                </div>
+                            {% endfor %}
                         </div>
                         {% if form.profile_picture.value %}
                             <div class="mb-3">
@@ -68,16 +55,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.querySelector('.img-thumbnail');
-                    if (img) {
-                        img.src = e.target.result;
-                    } else {
-                        const newImg = document.createElement('img');
-                        newImg.src = e.target.result;
-                        newImg.alt = 'নতুন প্রোফাইল ছবি';
-                        newImg.className = 'img-thumbnail';
-                        newImg.style.maxWidth = '200px';
-                        fileInput.parentNode.appendChild(newImg);
-                    }
+                    img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }

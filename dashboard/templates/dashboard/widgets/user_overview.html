@@ -1,12 +1,9 @@
-
 {% load static %}
 <div class="card user-overview">
     <div class="card-body text-center">
-        {% if user_profile.profile_image %}
-        <img src="{{ user_profile.profile_image.url }}" alt="প্রোফাইল ছবি" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-        {% else %}
-        <img src="{% static 'images/default_profile.png' %}" alt="ডিফল্ট প্রোফাইল ছবি" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-        {% endif %}
+        <img src="{% if user_profile.profile_image %}{{ user_profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" 
+             alt="{% if user_profile.profile_image %}প্রোফাইল ছবি{% else %}ডিফল্ট প্রোফাইল ছবি{% endif %}" 
+             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
         <h2 class="card-title">{{ user_profile.user.get_full_name }}</h2>
         <p class="card-text">ব্যাচ: {{ user_profile.batch.name }}</p>
         <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#changeProfilePicModal">

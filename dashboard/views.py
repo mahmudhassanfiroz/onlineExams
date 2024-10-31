@@ -16,6 +16,12 @@ from results.models import Result
 from exams.models import UserExam
 from django.contrib.contenttypes.models import ContentType
 
+def get_user_exam_content_types(user):
+    """Retrieve content types for user exams and live exams."""
+    user_live_exam_content_type = ContentType.objects.get_for_model(UserLiveExam)
+    user_exam_content_type = ContentType.objects.get_for_model(UserExam)
+    return user_live_exam_content_type, user_exam_content_type
+
 @login_required
 def user_dashboard(request):
     user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -23,8 +29,7 @@ def user_dashboard(request):
     
     upcoming_exams = LiveExam.objects.filter(start_time__gt=timezone.now()).order_by('start_time')[:5]
     
-    user_live_exam_content_type = ContentType.objects.get_for_model(UserLiveExam)
-    user_exam_content_type = ContentType.objects.get_for_model(UserExam)
+    user_live_exam_content_type, user_exam_content_type = get_user_exam_content_types(request.user)
     
     recent_results = Result.objects.filter(
         Q(content_type=user_live_exam_content_type, object_id__in=UserLiveExam.objects.filter(user=request.user).values_list('id', flat=True)) |
@@ -44,7 +49,7 @@ def user_dashboard(request):
     correct_answers = user_results.aggregate(Sum('correct_answers'))['correct_answers__sum'] or 0
     wrong_answers = user_results.aggregate(Sum('wrong_answers'))['wrong_answers__sum'] or 0
 
-    # ডিফল্ট উইজেট অর্ডার
+    # Default widget order
     default_widget_order = [
         'user_overview',
         'performance_metrics',
@@ -54,15 +59,15 @@ def user_dashboard(request):
         'quick_links'
     ]
 
-    # যদি user_preference এ widget_order না থাকে বা খালি হয়, তাহলে ডিফল্ট ব্যবহার করুন
+    # Set default widget order if not present
     if not user_preference.widget_order:
         user_preference.widget_order = default_widget_order
         user_preference.save()
     
-    # যদি widget_order একটি স্ট্রিং হয়, তাহলে এটিকে লিস্টে রূপান্তর করুন
+    # Convert widget_order to list if it's a string
     widget_order = user_preference.widget_order if isinstance(user_preference.widget_order, list) else user_preference.widget_order.split(',')
 
-    # উইজেট ডেটা ডিকশনারি
+    # Widget data dictionary
     widget_data = {
         'user_overview': {'user_profile': user_profile},
         'performance_metrics': {
@@ -74,11 +79,11 @@ def user_dashboard(request):
         'recent_results': {'recent_results': recent_results},
         'notifications': {'notifications': notifications},
         'recent_activities': {'recent_activities': recent_activities},
-        'quick_links': {},  # এখানে আপনি দ্রুত লিঙ্কগুলি যোগ করতে পারেন
+        'quick_links': {},  # Add quick links here
         'upcoming_exams': {'upcoming_exams': upcoming_exams}
     }
 
-    # শুধুমাত্র ব্যবহারকারীর পছন্দের উইজেটগুলি নির্বাচন করুন
+    # Select only user-preferred widgets
     selected_widgets = {widget: widget_data[widget] for widget in widget_order if widget in widget_data}
 
     context = {
@@ -89,11 +94,9 @@ def user_dashboard(request):
     }
     return render(request, 'dashboard/dashboard.html', context)
 
-
 @login_required
 def performance_analysis(request):
-    user_live_exam_content_type = ContentType.objects.get_for_model(UserLiveExam)
-    user_exam_content_type = ContentType.objects.get_for_model(UserExam)
+    user_live_exam_content_type, user_exam_content_type = get_user_exam_content_types(request.user)
 
     results = Result.objects.filter(
         Q(
@@ -135,6 +138,7 @@ def performance_analysis(request):
     }
     return render(request, 'dashboard/performance_metrics.html', context)
 
+@login_required
 def customize_dashboard(request):
     user_preference, created = UserPreference.objects.get_or_create(user=request.user)
 
@@ -158,8 +162,6 @@ def customize_dashboard(request):
     }
     return render(request, 'dashboard/customize_dashboard.html', context)
 
-
-
 @login_required
 def submit_feedback(request):
     if request.method == 'POST':
@@ -171,6 +173,7 @@ def submit_feedback(request):
         else:
             messages.error(request, _('দয়া করে একটি বার্তা লিখুন।'))
     return render(request, 'dashboard/submit_feedback.html')
+
 @login_required
 def change_profile_picture(request):
     if request.method == 'POST' and request.FILES.get('profile_picture'):
@@ -181,4 +184,3 @@ def change_profile_picture(request):
     else:
         messages.error(request, 'প্রোফাইল ছবি আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
     return redirect('dashboard:user_dashboard')
-

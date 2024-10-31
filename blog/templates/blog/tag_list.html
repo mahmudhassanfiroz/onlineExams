@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -15,7 +14,7 @@
             {% if tags %}
                 <div class="tag-cloud">
                     {% for tag in tags %}
-                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="btn btn-outline-primary m-1" style="font-size: {{ tag.font_size }}px;">
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="btn btn-outline-primary m-1 tag-link">
                             {{ tag.name }} ({{ tag.post_count }})
                         </a>
                     {% endfor %}

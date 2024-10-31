@@ -51,15 +51,16 @@
 {% endif %}
 <!-- ক্যারোসেল শেষ -->
 
-<!-- কোচিং প্যাকেজ সেকশন শুরু -->
-<div class="coaching-packages py-5">
+<!-- প্যাকেজ সেকশন -->
+{% macro render_packages(title, packages, bg_color, btn_color) %}
+<div class="py-5 {{ bg_color }}">
     <div class="container">
-        <h2 class="text-center mb-5">কোচিং প্যাকেজসমূহ</h2>
+        <h2 class="text-center mb-5">{{ title }}</h2>
         <div class="row">
-            {% for package in coaching_packages %}
+            {% for package in packages %}
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header {{ btn_color }} text-white">
                         <h3 class="card-title text-center">{{ package.name }}</h3>
                     </div>
                     <div class="card-body">
@@ -68,52 +69,22 @@
                         <p class="card-text">মেয়াদ: {{ package.duration }}</p>
                     </div>
                     <div class="card-footer text-center">
-                        <a href="{% url 'services:package_detail' package.slug %}" class="btn btn-success">বিস্তারিত দেখুন</a>
+                        <a href="{% url 'services:package_detail' package.slug %}" class="btn {{ btn_color }}">বিস্তারিত দেখুন</a>
                     </div>
                 </div>
             </div>
             {% empty %}
             <div class="col-12">
-                <p class="text-center">কোনো কোচিং প্যাকেজ পাওয়া যায়নি।</p>
+                <p class="text-center">কোনো প্যাকেজ পাওয়া যায়নি।</p>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
-<!-- কোচিং প্যাকেজ সেকশন শেষ -->
+{% endmacro %}
 
-<!-- ছাত্র-ছাত্রী প্যাকেজ সেকশন শুরু -->
-<div class="student-packages py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">ছাত্র-ছাত্রীদের জন্য প্যাকেজসমূহ</h2>
-        <div class="row">
-            {% for package in student_packages %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header bg-info text-white">
-                        <h3 class="card-title text-center">{{ package.name }}</h3>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ package.description|safe|truncatewords_html:30 }}</p>
-                        <h4 class="card-title text-center mb-4">{{ package.price }} টাকা</h4>
-                        <p class="card-text">মেয়াদ: {{ package.duration }}</p>
-                    </div>
-                    <div class="card-footer text-center">
-                        <a href="{% url 'services:package_detail' package.slug %}" class="btn btn-info">বিস্তারিত দেখুন</a>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12">
-                <p class="text-center">কোনো ছাত্র-ছাত্রী প্যাকেজ পাওয়া যায়নি।</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-<!-- ছাত্র-ছাত্রী প্যাকেজ সেকশন শেষ -->
-
-
+{{ render_packages("কোচিং প্যাকেজসমূহ", coaching_packages, "bg-light", "bg-success") }}
+{{ render_packages("ছাত্র-ছাত্রীদের জন্য প্যাকেজসমূহ", student_packages, "bg-light", "bg-info") }}
 
 <!-- ফিডব্যাক মডাল -->
 {% if user.is_authenticated %}
@@ -235,7 +206,6 @@
         </div>
     </div>
 </section>
-
 
 <!-- কিভাবে কাজ করে সেকশন -->
 <section class="how-it-works py-5 bg-light">

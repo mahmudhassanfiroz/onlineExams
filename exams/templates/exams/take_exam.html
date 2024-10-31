@@ -14,7 +14,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">প্রশ্ন {{ forloop.counter }}: {{ question.question_text|safe }}</h5>
-                {% if question.question_type == 'MCQ' or question.question_type == 'TF' %}
+                {% if question.question_type in 'MCQ,TF' %}
                     {% for option in question.get_options %}
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="option_{{ question.id }}_{{ forloop.counter }}" value="{{ option }}">

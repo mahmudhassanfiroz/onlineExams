@@ -1,10 +1,9 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
 <h1>{{ author.name }}</h1>
 {% if author.photo %}
-    <img src="{{ author.photo.url }}" alt="{{ author.name }}">
+    <img src="{{ author.photo.url }}" alt="{{ author.name }}" class="img-fluid mb-3">
 {% endif %}
 <p>{{ author.bio }}</p>
 
@@ -12,10 +11,10 @@
 <div class="book-list">
     {% for book in books %}
         <div class="book-card">
-            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid">
             <h3>{{ book.title }}</h3>
             <p>মূল্য: {{ book.price }} টাকা</p>
-            <a href="{% url 'books:book_detail' book.id %}">বিস্তারিত দেখুন</a>
+            <a href="{% url 'books:book_detail' book.id %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
         </div>
     {% empty %}
         <p>এই লেখকের কোনো বই পাওয়া যায়নি।</p>

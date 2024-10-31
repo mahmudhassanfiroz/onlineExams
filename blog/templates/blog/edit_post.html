@@ -90,11 +90,7 @@
 
         // বর্তমান ছবি মুছে ফেলার অপশন
         $('#remove_image').change(function() {
-            if(this.checked) {
-                $('#current-image').css('opacity', '0.5');
-            } else {
-                $('#current-image').css('opacity', '1');
-            }
+            $('#current-image').css('opacity', this.checked ? '0.5' : '1');
         });
 
         // ফর্ম সাবমিশনের সময় লোডিং স্পিনার দেখানোর জন্য

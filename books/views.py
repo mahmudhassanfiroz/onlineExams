@@ -11,23 +11,20 @@ from .models import Book, Category, Author, Wishlist, BookReview
 from .forms import ReviewForm
 
 def book_list(request):
-    books = Book.objects.all()
-    categories = Category.objects.all()
-    featured_books = Book.objects.filter(is_featured=True)
-    
     search_query = request.GET.get('search')
     category_id = request.GET.get('category')
     
+    books = Book.objects.all()
     if search_query:
         books = books.filter(title__icontains=search_query) | books.filter(author__name__icontains=search_query)
     
     if category_id:
         books = books.filter(category_id=category_id)
-    
+
     context = {
         'books': books,
-        'categories': categories,
-        'featured_books': featured_books,
+        'categories': Category.objects.all(),
+        'featured_books': Book.objects.filter(is_featured=True),
     }
     return render(request, 'books/book_list.html', context)
 
@@ -99,7 +96,6 @@ def category_detail(request, category_id):
     context = {'category': category, 'books': books}
     return render(request, 'books/category_detail.html', context)
 
-
 @login_required
 def purchase_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
@@ -117,12 +113,10 @@ def purchase_book(request, book_id):
             tran_id=f"BOOK-{book.id}-{timezone.now().timestamp()}",
             book=book
         )
-        
         return redirect('payments:initiate_payment', item_type='BOOK', item_id=book.id)
     except Exception as e:
         messages.error(request, f'পেমেন্ট তৈরি করতে সমস্যা হয়েছে: {str(e)}')
         return redirect('books:book_detail', book_id=book.id)
-
 
 @login_required
 def download_book(request, book_id):
@@ -140,4 +134,3 @@ def download_book(request, book_id):
         messages.error(request, 'আপনি এই বইটি কিনেন নি।')
     
     return redirect('books:book_detail', book_id=book.id)
-

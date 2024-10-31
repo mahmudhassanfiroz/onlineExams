@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %}প্রোফাইল - {{ block.super }}{% endblock %}
+{% block title %}প্রোফাইল{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="mb-4">প্রোফাইল</h1>
     <div class="row">
         <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <img src="{{ user.userprofile.profile_picture.url|default:'https://via.placeholder.com/150' }}" 
+            <div class="card mb-4 text-center">
+                <div class="card-body">
+                    <img src="{{ user.userprofile.profile_picture.url if user.userprofile.profile_picture else 'https://via.placeholder.com/150' }}" 
                          alt="প্রোফাইল ছবি" 
                          class="rounded-circle img-fluid mb-3" 
                          style="width: 150px; height: 150px; object-fit: cover;">
@@ -29,20 +29,14 @@
                             {% for field in form %}
                                 <div class="mb-3">
                                     <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {% if field.name == 'profile_picture' %}
-                                        {% render_field field class="form-control-file" %}
-                                    {% else %}
-                                        {% render_field field class="form-control" %}
+                                    {% render_field field class="form-control" if field.name != 'profile_picture' else 'form-control-file' %}
+                                    {% if field.errors %}
+                                        <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
                                     {% endif %}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ error }}
-                                        </div>
-                                    {% endfor %}
                                 </div>
                             {% endfor %}
                         {% endfor %}
-                        <button type="submit" class="btn btn-primary">প্রোফাইল আপডেট করুন</button>
+                        <button type="submit" class="btn btn-primary w-100">প্রোফাইল আপডেট করুন</button>
                     </form>
                 </div>
             </div>

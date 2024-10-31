@@ -1,10 +1,10 @@
 .card {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s; /* Specify the property for clarity */
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .rating {
@@ -13,38 +13,38 @@
     justify-content: flex-end;
 }
 
-.rating:not(:checked) > input {
+.rating input {
     position: absolute;
-    top: -9999px;
+    top: -9999px; /* Hide input */
 }
 
-.rating:not(:checked) > label {
+.rating label {
     float: right;
     width: 1em;
-    overflow: hidden;
-    white-space: nowrap;
     cursor: pointer;
     font-size: 30px;
     color: #ccc;
+    overflow: hidden; /* Keep this here for better readability */
+    white-space: nowrap;
 }
 
-.rating:not(:checked) > label:before {
-    content: '★ ';
+/* Use a common before content for all labels */
+.rating label:before {
+    content: '★ '; /* Star symbol */
 }
 
 .rating > input:checked ~ label {
-    color: #ffc700;    
+    color: #ffc700; /* Color for selected rating */
 }
 
-.rating:not(:checked) > label:hover,
-.rating:not(:checked) > label:hover ~ label {
-    color: #deb217;  
+.rating label:hover,
+.rating label:hover ~ label {
+    color: #deb217; /* Color on hover */
 }
 
 .rating > input:checked + label:hover,
 .rating > input:checked + label:hover ~ label,
 .rating > input:checked ~ label:hover,
-.rating > input:checked ~ label:hover ~ label,
 .rating > label:hover ~ input:checked ~ label {
-    color: #c59b08;
+    color: #c59b08; /* Color when hovering over selected */
 }

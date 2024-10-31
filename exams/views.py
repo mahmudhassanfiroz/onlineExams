@@ -8,7 +8,7 @@ from services.models import ExamCategory, UserPackage
 
 def exam_list(request):
     exams = Exam.objects.all()
-    categories = ExamCategory.objects.all()  # সব ক্যাটাগরি নিয়ে আসা হচ্ছে
+    categories = ExamCategory.objects.all()
     query = request.GET.get('q')
     category = request.GET.get('category')
     difficulty = request.GET.get('difficulty')
@@ -22,17 +22,16 @@ def exam_list(request):
 
     context = {
         'exams': exams,
-        'categories': categories,  # ক্যাটাগরিগুলো কনটেক্সটে যোগ করা হচ্ছে
+        'categories': categories,
         'query': query,
         'selected_category': category,
         'selected_difficulty': difficulty,
     }
     return render(request, 'exams/exam_list.html', context)
 
-
 @login_required
 def exam_detail(request, slug):
-    exam = get_object_or_404(Exam, slug=slug)
+    exam = get_object_or_404(Exam.objects.select_related('exam_category'), slug=slug)
     user_package = UserPackage.objects.filter(user=request.user, package__exam_categories=exam.exam_category, is_active=True).first()
     can_take_exam = exam.is_free or (user_package is not None)
 
@@ -72,7 +71,7 @@ def take_exam(request, slug):
 
 @login_required
 def exam_result(request, exam_id):
-    user_exam = get_object_or_404(UserExam, id=exam_id, user=request.user)
+    user_exam = get_object_or_404(UserExam.objects.select_related('exam'), id=exam_id, user=request.user)
     answers = user_exam.useranswer_set.all().select_related('question')
     context = {
         'user_exam': user_exam,
@@ -89,9 +88,8 @@ def free_exams(request):
 
 @login_required
 def user_exams(request):
-    user_exams = UserExam.objects.filter(user=request.user).order_by('-start_time')
+    user_exams = UserExam.objects.filter(user=request.user).order_by('-start_time').select_related('exam')
     context = {
         'user_exams': user_exams,
     }
     return render(request, 'exams/user_exams.html', context)
-

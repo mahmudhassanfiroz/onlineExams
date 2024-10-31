@@ -20,9 +20,9 @@
             <div class="col-md-3">
                 <select name="difficulty" class="form-select">
                     <option value="">সব ধরনের কঠিনতা</option>
-                    <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>সহজ</option>
-                    <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>মাঝারি</option>
-                    <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>কঠিন</option>
+                    {% for level in "easy,medium,hard"|split:"," %}
+                        <option value="{{ level }}" {% if selected_difficulty == level %}selected{% endif %}>{{ level|title }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">

@@ -16,7 +16,7 @@
                         {% for field in form %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                {{ field }}
+                                {{ field|add_class:"form-control" }}  {# Add Bootstrap class to the field #}
                                 {% if field.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in field.errors %}
@@ -44,6 +44,10 @@
                                 <p class="card-text">{{ info.content }}</p>
                             </div>
                         </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-center text-muted">কোনো অতিরিক্ত যোগাযোগের মাধ্যম নেই।</p>
                     </div>
                     {% endfor %}
                 </div>

@@ -1,10 +1,10 @@
 .card {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s; /* Specify the property being transitioned */
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .layout-preview {
@@ -15,5 +15,5 @@
 
 #layout-preview-container {
     min-height: 200px;
-    background-color: white;
+    background-color: #fff; /* Use #fff instead of 'white' for brevity */
 }

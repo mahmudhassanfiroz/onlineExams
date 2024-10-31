@@ -37,11 +37,9 @@
                     <p>{{ answer.question.text }}</p>
                     <p>আপনার উত্তর: {{ answer.answer_text }}</p>
                     <p>সঠিক উত্তর: {{ answer.question.correct_answer }}</p>
-                    {% if answer.is_correct %}
-                        <p class="text-success">সঠিক!</p>
-                    {% else %}
-                        <p class="text-danger">ভুল</p>
-                    {% endif %}
+                    <p class="{% if answer.is_correct %}text-success{% else %}text-danger{% endif %}">
+                        {% if answer.is_correct %}সঠিক!{% else %}ভুল{% endif %}
+                    </p>
                 </div>
             </div>
         {% endfor %}

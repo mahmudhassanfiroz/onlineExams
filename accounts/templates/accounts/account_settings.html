@@ -1,13 +1,16 @@
-
 {% extends 'base.html' %}
 {% load i18n %}
 
 {% block content %}
-<h2>{% trans "অ্যাকাউন্ট সেটিংস" %}</h2>
+<h2>{% trans "Account Settings" %}</h2>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% trans "সেটিংস আপডেট করুন" %}</button>
+    {# Render each form field manually for better control #}
+    {{ form.username.label_tag }} {{ form.username }}
+    {{ form.email.label_tag }} {{ form.email }}
+    {{ form.profile_picture.label_tag }} {{ form.profile_picture }}
+    <!-- Add more fields as needed -->
+
+    <button type="submit" class="btn btn-primary">{% trans "Update Settings" %}</button>
 </form>
 {% endblock %}
-

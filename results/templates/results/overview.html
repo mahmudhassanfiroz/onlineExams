@@ -4,38 +4,16 @@
 <div class="container mt-5">
     <h1 class="mb-4">ফলাফলের সারসংক্ষেপ</h1>
     <div class="row">
+        {% for title, value in [('মোট পরীক্ষা', total_exams), ('মোট স্কোর', total_score), ('মোট সঠিক উত্তর', total_correct), ('মোট ভুল উত্তর', total_wrong)] %}
         <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">মোট পরীক্ষা</h5>
-                    <p class="card-text display-4">{{ total_exams }}</p>
+                    <h5 class="card-title">{{ title }}</h5>
+                    <p class="card-text display-4">{{ value }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">মোট স্কোর</h5>
-                    <p class="card-text display-4">{{ total_score }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">মোট সঠিক উত্তর</h5>
-                    <p class="card-text display-4">{{ total_correct }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">মোট ভুল উত্তর</h5>
-                    <p class="card-text display-4">{{ total_wrong }}</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

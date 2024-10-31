@@ -1,19 +1,20 @@
-
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">সাম্প্রতিক কার্যক্রম</h3>
     </div>
     <div class="card-body">
         <ul class="list-group">
-        {% for activity in recent_activities %}
-            <li class="list-group-item">
-                <small class="text-muted">{{ activity.created_at|timesince }} আগে</small>
-                <br>
-                {{ activity.description }}
-            </li>
-        {% empty %}
+        {% if recent_activities %}
+            {% for activity in recent_activities %}
+                <li class="list-group-item">
+                    <small class="text-muted">{{ activity.created_at|timesince }} আগে</small>
+                    <br>
+                    {{ activity.description }}
+                </li>
+            {% endfor %}
+        {% else %}
             <li class="list-group-item">কোনো সাম্প্রতিক কার্যক্রম নেই।</li>
-        {% endfor %}
+        {% endif %}
         </ul>
     </div>
 </div>

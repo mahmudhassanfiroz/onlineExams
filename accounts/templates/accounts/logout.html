@@ -1,21 +1,20 @@
-
 {% extends 'base.html' %}
 
-{% block title %}লগআউট - {{ block.super }}{% endblock %}
+{% block title %}Logout - {{ block.super }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card text-center">
             <div class="card-header">
-                <h2 class="text-center">লগআউট</h2>
+                <h2>Logout</h2>
             </div>
             <div class="card-body">
-                <p class="text-center">আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?</p>
-                <form method="post" class="text-center">
+                <p>Are you sure you want to log out?</p>
+                <form method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">লগআউট করুন</button>
-                    <a href="{% url 'home' %}" class="btn btn-secondary">বাতিল করুন</a>
+                    <button type="submit" class="btn btn-danger">Logout</button>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>

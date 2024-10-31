@@ -12,12 +12,14 @@
             {% if exam.is_free %}
                 <p class="card-text"><span class="badge bg-success">বিনামূল্যে</span></p>
             {% endif %}
-            {% if can_take_exam %}
-                <a href="{% url 'exams:take_exam' exam.slug %}" class="btn btn-primary">পরীক্ষা দিন</a>
-            {% else %}
-                <p class="text-danger">এই পরীক্ষা দেওয়ার জন্য আপনাকে প্যাকেজ কিনতে হবে।</p>
-                <a href="{% url 'package_list' %}" class="btn btn-primary">প্যাকেজ দেখুন</a>
-            {% endif %}
+            <div>
+                {% if can_take_exam %}
+                    <a href="{% url 'exams:take_exam' exam.slug %}" class="btn btn-primary">পরীক্ষা দিন</a>
+                {% else %}
+                    <p class="text-danger">এই পরীক্ষা দেওয়ার জন্য আপনাকে প্যাকেজ কিনতে হবে।</p>
+                    <a href="{% url 'package_list' %}" class="btn btn-primary">প্যাকেজ দেখুন</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

@@ -18,6 +18,10 @@
                 <td>{{ entry.user.username }}</td>
                 <td>{{ entry.score }}</td>
             </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">কোনো তথ্য নেই</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>

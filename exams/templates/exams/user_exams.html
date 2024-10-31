@@ -20,11 +20,9 @@
                     <td>{{ user_exam.start_time|date:"F d, Y H:i" }}</td>
                     <td>{{ user_exam.score }} / {{ user_exam.exam.questions.count }}</td>
                     <td>
-                        {% if user_exam.is_completed %}
-                            <span class="badge bg-success">সম্পন্ন</span>
-                        {% else %}
-                            <span class="badge bg-warning">অসম্পূর্ণ</span>
-                        {% endif %}
+                        <span class="badge {% if user_exam.is_completed %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if user_exam.is_completed %}সম্পন্ন{% else %}অসম্পূর্ণ{% endif %}
+                        </span>
                     </td>
                     <td>
                         {% if user_exam.is_completed %}

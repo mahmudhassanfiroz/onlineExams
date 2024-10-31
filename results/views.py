@@ -23,7 +23,6 @@ def results_overview(request):
         Q(content_type=user_exam_content_type, object_id__in=UserExam.objects.filter(user=request.user).values_list('id', flat=True))
     )
 
-    total_exams = results.count()
     aggregates = results.aggregate(
         total_score=Sum('score'),
         total_correct=Sum('correct_answers'),
@@ -31,7 +30,7 @@ def results_overview(request):
     )
 
     context = {
-        'total_exams': total_exams,
+        'total_exams': results.count(),
         'total_score': aggregates['total_score'] or 0,
         'total_correct': aggregates['total_correct'] or 0,
         'total_wrong': aggregates['total_wrong'] or 0,
@@ -42,10 +41,7 @@ def results_overview(request):
 def individual_result(request, result_id):
     result = get_object_or_404(Result, id=result_id)
     
-    if result.content_object is None:
-        raise Http404("রেজাল্টের সাথে সম্পর্কিত পরীক্ষা পাওয়া যায়নি।")
-    
-    if not (isinstance(result.content_object, (UserExam, UserLiveExam)) and result.content_object.user == request.user):
+    if not (result.content_object and isinstance(result.content_object, (UserExam, UserLiveExam)) and result.content_object.user == request.user):
         raise Http404("আপনি এই রেজাল্ট দেখার অনুমতি পাননি।")
     
     context = {
@@ -76,10 +72,7 @@ def generate_pdf(request, result_id):
     p = canvas.Canvas(buffer, pagesize=letter)
     
     p.drawString(100, 750, f"Result for {result.content_object.user.username}")
-    if isinstance(result.content_object, UserLiveExam):
-        p.drawString(100, 700, f"Live Exam: {result.content_object.live_exam.title}")
-    else:
-        p.drawString(100, 700, f"Exam: {result.content_object.exam.title}")
+    p.drawString(100, 700, f"{'Live Exam' if isinstance(result.content_object, UserLiveExam) else 'Exam'}: {result.content_object.live_exam.title if isinstance(result.content_object, UserLiveExam) else result.content_object.exam.title}")
     p.drawString(100, 650, f"Score: {result.score}")
     p.drawString(100, 600, f"Correct Answers: {result.correct_answers}")
     p.drawString(100, 550, f"Wrong Answers: {result.wrong_answers}")

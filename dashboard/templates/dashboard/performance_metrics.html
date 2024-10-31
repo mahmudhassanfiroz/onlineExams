@@ -35,22 +35,12 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
+                        {% for metric, value, badge_class in [('মোট পরীক্ষা', total_exams, 'primary'), ('গড় স্কোর', avg_score|floatformat:2, 'info'), ('সঠিক উত্তর', correct_answers, 'success'), ('ভুল উত্তর', wrong_answers, 'danger')] %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            মোট পরীক্ষা
-                            <span class="badge bg-primary rounded-pill">{{ total_exams }}</span>
+                            {{ metric }}
+                            <span class="badge bg-{{ badge_class }} rounded-pill">{{ value }}</span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            গড় স্কোর
-                            <span class="badge bg-info rounded-pill">{{ avg_score|floatformat:2 }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            সঠিক উত্তর
-                            <span class="badge bg-success rounded-pill">{{ correct_answers }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            ভুল উত্তর
-                            <span class="badge bg-danger rounded-pill">{{ wrong_answers }}</span>
-                        </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>
@@ -115,4 +105,3 @@
     });
 </script>
 {% endblock %}
-

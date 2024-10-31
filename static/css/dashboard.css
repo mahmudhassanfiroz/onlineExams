@@ -4,12 +4,12 @@ body {
 }
 
 .card {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s; /* Specify the property being transitioned */
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
@@ -18,7 +18,7 @@ body {
 }
 
 .list-group-item {
-    transition: 0.2s;
+    transition: background-color 0.2s; /* Specify the property being transitioned */
 }
 
 .list-group-item:hover {
@@ -37,7 +37,7 @@ body.light {
 }
 
 body.light .card {
-    background-color: #ffffff;
+    background-color: #fff; /* Use shorthand for white */
 }
 
 body.dark {
@@ -70,7 +70,7 @@ body.blue {
 }
 
 body.blue .card {
-    background-color: #ffffff;
+    background-color: #fff;
     border-color: #b8daff;
 }
 
@@ -86,20 +86,12 @@ body.blue .list-group-item:hover {
 /* লেআউট স্টাইল */
 .dashboard-container {
     transition: all 0.3s;
-}
-
-.dashboard-container.default {
-    max-width: 1140px;
+    max-width: 1140px; /* Default width for dashboard */
     margin: 0 auto;
 }
 
 .dashboard-container.compact {
     max-width: 960px;
-    margin: 0 auto;
-}
-
-.dashboard-container.compact .card {
-    margin-bottom: 1rem;
 }
 
 .dashboard-container.expanded {
@@ -108,15 +100,13 @@ body.blue .list-group-item:hover {
 }
 
 .dashboard-container.expanded .row {
-    margin-left: -1rem;
-    margin-right: -1rem;
+    margin: 0 -1rem; /* Combine left and right margins */
 }
 
 .dashboard-container.expanded .col-md-4,
 .dashboard-container.expanded .col-md-6,
 .dashboard-container.expanded .col-md-8 {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0 1rem; /* Combine left and right paddings */
 }
 
 /* উইজেট স্টাইল */

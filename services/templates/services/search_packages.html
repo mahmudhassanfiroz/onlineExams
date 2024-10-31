@@ -19,7 +19,7 @@
                         <p class="card-text">{{ package.description|safe|truncatewords_html:30 }}</p>
                         <p class="card-text"><strong>মূল্য:</strong> {{ package.price }} টাকা</p>
                         <p class="card-text"><strong>মেয়াদ:</strong> {{ package.duration }}</p>
-                        <a href="{% url 'package_detail' package.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
+                        <a href="{% url 'services:package_detail' package.slug %}" class="btn btn-primary">বিস্তারিত দেখুন</a>
                     </div>
                 </div>
             </div>

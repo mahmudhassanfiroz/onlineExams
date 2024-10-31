@@ -1,18 +1,19 @@
-
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">সাম্প্রতিক ফলাফল</h3>
     </div>
     <div class="card-body">
         <ul class="list-group">
-        {% for result in recent_results %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ result.content_object.exam.title }} - স্কোর: {{ result.score }}
-                <a href="{% url 'results:individual_result' result.id %}" class="btn btn-info btn-sm">বিস্তারিত</a>
-            </li>
-        {% empty %}
+        {% if recent_results %}
+            {% for result in recent_results %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ result.content_object.exam.title }} - স্কোর: {{ result.score }}
+                    <a href="{% url 'results:individual_result' result.id %}" class="btn btn-info btn-sm">বিস্তারিত</a>
+                </li>
+            {% endfor %}
+        {% else %}
             <li class="list-group-item">কোনো সাম্প্রতিক ফলাফল নেই।</li>
-        {% endfor %}
+        {% endif %}
         </ul>
     </div>
 </div>

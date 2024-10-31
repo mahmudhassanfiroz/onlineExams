@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -6,10 +5,10 @@
 
 <div class="category-list">
     {% for category in categories %}
-        <div class="category-card">
+        <div class="category-card mb-4">
             <h2>{{ category.name }}</h2>
             <p>{{ category.description }}</p>
-            <a href="{% url 'books:category_detail' category.id %}">এই ক্যাটাগরির বই দেখুন</a>
+            <a href="{% url 'books:category_detail' category.id %}" class="btn btn-outline-primary">এই ক্যাটাগরির বই দেখুন</a>
         </div>
     {% empty %}
         <p>কোনো ক্যাটাগরি পাওয়া যায়নি।</p>

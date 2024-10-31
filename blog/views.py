@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib import messages
@@ -10,39 +10,31 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from accounts.models import CustomUser
-from .models import Post, Tag, Comment, Reaction, Subscription
+from .models import Post, Tag, Comment, Reaction
 from .forms import PostForm, CommentForm, SubscriptionForm
 
 def post_list(request, tag_slug=None):
-    posts = Post.objects.filter(status='published', published_at__lte=timezone.now()).select_related('author').only('title', 'slug', 'author__username', 'published_at', 'content').order_by('-published_at')
+    posts = Post.objects.filter(status='published', published_at__lte=timezone.now()).select_related('author').order_by('-published_at')
     
+    # Search functionality
     search_query = request.GET.get('search')
     if search_query:
         posts = posts.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
     
+    # Filter by tag
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)
         posts = posts.filter(tags=tag)
     
-    featured_posts = Post.objects.filter(is_featured=True, status='published').select_related('author').only('title', 'slug', 'author__username', 'published_at')[:3]
+    featured_posts = Post.objects.filter(is_featured=True, status='published').select_related('author')[:3]
     
     # Archive dates
-    archive_dates = posts.annotate(month=TruncMonth('published_at')) \
-        .values('month') \
-        .annotate(count=Count('id')) \
-        .order_by('-month')
-
+    archive_dates = posts.annotate(month=TruncMonth('published_at')).values('month').annotate(count=Count('id')).order_by('-month')
     archive_data = {}
     for date in archive_dates:
         year = date['month'].year
         month = date['month'].strftime('%B')
-        if year not in archive_data:
-            archive_data[year] = []
-        archive_data[year].append({
-            'name': month,
-            'number': date['month'].strftime('%m'),
-            'count': date['count']
-        })
+        archive_data.setdefault(year, []).append({'name': month, 'number': date['month'].strftime('%m'), 'count': date['count']})
 
     archive_dates = [{'year': year, 'months': months} for year, months in archive_data.items()]
     
@@ -50,8 +42,7 @@ def post_list(request, tag_slug=None):
     page = request.GET.get('page')
     posts = paginator.get_page(page)
     
-    recent_posts = Post.objects.filter(status='published').select_related('author').only('title', 'slug', 'author__username', 'published_at').order_by('-published_at')[:5]
-    
+    recent_posts = Post.objects.filter(status='published').select_related('author').order_by('-published_at')[:5]
     tags = Tag.objects.annotate(post_count=Count('post'))
     
     context = {
@@ -62,7 +53,6 @@ def post_list(request, tag_slug=None):
         'archive_dates': archive_dates,
     }
     return render(request, 'blog/post_list.html', context)
-
 
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug, status='published')
@@ -103,7 +93,7 @@ def create_post(request):
             post = form.save(commit=False)
             post.author = request.user
             
-            # স্লাগ তৈরি
+            # Create unique slug
             base_slug = slugify(post.title)
             unique_slug = base_slug
             num = 1
@@ -117,9 +107,9 @@ def create_post(request):
             
             try:
                 post.save()
-                form.save_m2m()  # ট্যাগ সেভ করা
+                form.save_m2m()  # Save tags
                 messages.success(request, 'আপনার পোস্ট সফলভাবে তৈরি করা হয়েছে।')
-                return redirect('blog:post_list')  # ব্লগের মূল পেজে রিডাইরেক্ট
+                return redirect('blog:post_list')
             except Exception as e:
                 messages.error(request, f'পোস্ট সেভ করতে সমস্যা: {str(e)}')
         else:
@@ -130,7 +120,6 @@ def create_post(request):
         form = PostForm()
     
     return render(request, 'blog/create_post.html', {'form': form})
-
 
 @login_required
 def edit_post(request, slug):

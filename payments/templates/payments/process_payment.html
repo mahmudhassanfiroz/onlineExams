@@ -5,11 +5,7 @@
     <h1 class="mb-4">পেমেন্ট প্রক্রিয়া</h1>
 
     {% if payment %}
-        {% if payment.payment_type == 'BOOK' %}
-            <h2>{{ payment.book.title }}</h2>
-        {% elif payment.payment_type == 'PACKAGE' %}
-            <h2>{{ payment.package.name }}</h2>
-        {% endif %}
+        <h2>{{ payment.payment_type == 'BOOK' ? payment.book.title : payment.package.name }}</h2>
         <p>মূল্য: {{ payment.amount }} টাকা</p>
 
         {% if payment.discounted_amount %}

@@ -25,7 +25,7 @@ def live_exam_list(request):
 
 @login_required
 def live_exam_detail(request, slug):
-    live_exam = get_object_or_404(LiveExam, slug=slug)
+    live_exam = get_object_or_404(LiveExam.objects.select_related('exam_category'), slug=slug)
     user_package = UserPackage.objects.filter(user=request.user, package__exam_categories=live_exam.exam_category, is_active=True).first()
     can_take_exam = live_exam.is_free or (user_package is not None)
 
@@ -73,7 +73,7 @@ def take_live_exam(request, slug):
 
 @login_required
 def live_exam_result(request, exam_id):
-    user_live_exam = get_object_or_404(UserLiveExam, id=exam_id, user=request.user)
+    user_live_exam = get_object_or_404(UserLiveExam.objects.select_related('live_exam'), id=exam_id, user=request.user)
     context = {
         'user_live_exam': user_live_exam,
         'answers': user_live_exam.liveexamanswer_set.all(),
@@ -89,9 +89,8 @@ def free_live_exams(request):
 
 @login_required
 def user_live_exams(request):
-    user_live_exams = UserLiveExam.objects.filter(user=request.user).order_by('-start_time')
+    user_live_exams = UserLiveExam.objects.filter(user=request.user).order_by('-start_time').select_related('live_exam')
     context = {
         'user_live_exams': user_live_exams,
     }
     return render(request, 'liveExam/user_live_exams.html', context)
-

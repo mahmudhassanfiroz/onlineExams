@@ -13,35 +13,9 @@
     <div class="row" id="dashboard-widgets">
         {% for widget_name in widget_order %}
             {% with widget_data=widgets|get_item:widget_name %}
-                {% if widget_name == 'user_overview' %}
-                    <div class="col-md-4 mb-4 widget" data-widget-type="user_overview">
-                        {% include 'dashboard/widgets/user_overview.html' with user_profile=widget_data.user_profile %}
-                    </div>
-                {% elif widget_name == 'performance_metrics' %}
-                    <div class="col-md-8 mb-4 widget" data-widget-type="performance_metrics">
-                        {% include 'dashboard/widgets/performance_metrics.html' with data=widget_data %}
-                    </div>
-                {% elif widget_name == 'recent_results' %}
-                    <div class="col-md-6 mb-4 widget" data-widget-type="recent_results">
-                        {% include 'dashboard/widgets/recent_results.html' with recent_results=widget_data.recent_results %}
-                    </div>
-                {% elif widget_name == 'notifications' %}
-                    <div class="col-md-6 mb-4 widget" data-widget-type="notifications">
-                        {% include 'dashboard/widgets/notifications.html' with notifications=widget_data.notifications %}
-                    </div>
-                {% elif widget_name == 'recent_activities' %}
-                    <div class="col-md-8 mb-4 widget" data-widget-type="recent_activities">
-                        {% include 'dashboard/widgets/recent_activities.html' with recent_activities=widget_data.recent_activities %}
-                    </div>
-                {% elif widget_name == 'quick_links' %}
-                    <div class="col-md-4 mb-4 widget" data-widget-type="quick_links">
-                        {% include 'dashboard/widgets/quick_links.html' %}
-                    </div>
-                {% elif widget_name == 'upcoming_exams' %}
-                    <div class="col-md-6 mb-4 widget" data-widget-type="upcoming_exams">
-                        {% include 'dashboard/widgets/upcoming_exams.html' with upcoming_exams=widget_data.upcoming_exams %}
-                    </div>
-                {% endif %}
+                <div class="col-md-{% if widget_name in 'user_overview,notifications,quick_links' %}4{% elif widget_name in 'recent_results,upcoming_exams' %}6{% else %}8{% endif %} mb-4 widget" data-widget-type="{{ widget_name }}">
+                    {% include 'dashboard/widgets/'|add:widget_name|add:'.html' with widget_data %}
+                </div>
             {% endwith %}
         {% endfor %}
     </div>
@@ -62,4 +36,3 @@
     document.querySelector('.dashboard-container').classList.add('{% if user_preference.dashboard_layout %}{{ user_preference.dashboard_layout }}{% else %}default{% endif %}');
 </script>
 {% endblock %}
-
