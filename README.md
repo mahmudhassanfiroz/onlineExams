@@ -4,7 +4,7 @@ Live Link: https://onlineexams-firoz.onrender.com/
 **Online Exam System** is a Django Web web app designed for students and teachers to take online exams and share educational resources. It provides encouragement in a blog where users can share their experiences and newcomers can learn from them. There are also notable books.
 
 ## Table of Contents
-- [Features] (#Features)
+- [Features](#Features)
 - [tech](#tech)
 - [installation](#installation)
 - [usage](#usage)
