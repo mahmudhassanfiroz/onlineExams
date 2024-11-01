@@ -1,16 +1,11 @@
+
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">দ্রুত লিঙ্ক</h3>
     </div>
     <div class="card-body">
         <div class="list-group">
-            {% for link in [
-                ('exams:exam_list', 'পরীক্ষা তালিকা'),
-                ('results:overview', 'ফলাফল সারসংক্ষেপ'),
-                ('accounts:account_settings', 'একাউন্ট সেটিংস'),
-                ('dashboard:customize_dashboard', 'ড্যাশবোর্ড কাস্টমাইজ করুন'),
-                ('dashboard:submit_feedback', 'প্রতিক্রিয়া জানান')
-            ] %}
+            {% for link in quick_links %}
                 <a href="{% url link.0 %}" class="list-group-item list-group-item-action">{{ link.1 }}</a>
             {% endfor %}
         </div>

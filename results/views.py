@@ -18,22 +18,29 @@ def results_overview(request):
     user_live_exam_content_type = ContentType.objects.get_for_model(UserLiveExam)
     user_exam_content_type = ContentType.objects.get_for_model(UserExam)
 
+    # Query for results
     results = Result.objects.filter(
         Q(content_type=user_live_exam_content_type, object_id__in=UserLiveExam.objects.filter(user=request.user).values_list('id', flat=True)) |
         Q(content_type=user_exam_content_type, object_id__in=UserExam.objects.filter(user=request.user).values_list('id', flat=True))
     )
 
+    # Aggregate values
     aggregates = results.aggregate(
         total_score=Sum('score'),
         total_correct=Sum('correct_answers'),
         total_wrong=Sum('wrong_answers')
     )
 
+    # Prepare metrics list for the template
+    metrics = [
+        ('মোট পরীক্ষা', results.count()),
+        ('মোট স্কোর', aggregates['total_score'] or 0),
+        ('মোট সঠিক উত্তর', aggregates['total_correct'] or 0),
+        ('মোট ভুল উত্তর', aggregates['total_wrong'] or 0),
+    ]
+
     context = {
-        'total_exams': results.count(),
-        'total_score': aggregates['total_score'] or 0,
-        'total_correct': aggregates['total_correct'] or 0,
-        'total_wrong': aggregates['total_wrong'] or 0,
+        'metrics': metrics
     }
     return render(request, 'results/overview.html', context)
 

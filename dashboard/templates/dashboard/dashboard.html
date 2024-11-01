@@ -14,11 +14,12 @@
         {% for widget_name in widget_order %}
             {% with widget_data=widgets|get_item:widget_name %}
                 <div class="col-md-{% if widget_name in 'user_overview,notifications,quick_links' %}4{% elif widget_name in 'recent_results,upcoming_exams' %}6{% else %}8{% endif %} mb-4 widget" data-widget-type="{{ widget_name }}">
-                    {% include 'dashboard/widgets/'|add:widget_name|add:'.html' with widget_data %}
+                    {% include 'dashboard/widgets/'|add:widget_name|add:'.html' with widget_data=widget_data %}
                 </div>
             {% endwith %}
         {% endfor %}
     </div>
+    
 </div>
 
 <!-- প্রোফাইল ছবি পরিবর্তনের মোডাল -->

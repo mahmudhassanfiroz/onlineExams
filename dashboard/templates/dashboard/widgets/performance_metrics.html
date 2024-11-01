@@ -4,10 +4,10 @@
     </div>
     <div class="card-body">
         <div class="row">
-            {% for metric, value, label in [('মোট পরীক্ষা', data.total_exams, 'মোট পরীক্ষা'), ('গড় স্কোর', data.avg_score|stringformat:"%.2f"|add:"%" , 'গড় স্কোর'), ('সঠিক উত্তর', data.correct_answers, 'সঠিক উত্তর'), ('ভুল উত্তর', data.wrong_answers, 'ভুল উত্তর')] %}
+            {% for metric in widgets.performance_metrics.metrics %}
             <div class="col-md-3 text-center">
-                <h4>{{ value }}</h4>
-                <p>{{ label }}</p>
+                <h4>{{ metric.value }}</h4>
+                <p>{{ metric.label }}</p>
             </div>
             {% endfor %}
         </div>

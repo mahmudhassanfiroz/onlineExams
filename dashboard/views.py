@@ -45,11 +45,18 @@ def user_dashboard(request):
         Q(content_type=user_exam_content_type, object_id__in=UserExam.objects.filter(user=request.user).values_list('id', flat=True))
     )
     total_exams = user_results.count()
-    avg_score = user_results.aggregate(Avg('score'))['score__avg'] or 0
+    avg_score = round(user_results.aggregate(Avg('score'))['score__avg'] or 0, 2)
     correct_answers = user_results.aggregate(Sum('correct_answers'))['correct_answers__sum'] or 0
     wrong_answers = user_results.aggregate(Sum('wrong_answers'))['wrong_answers__sum'] or 0
 
-    # Default widget order
+    # Organize performance metrics
+    performance_metrics = [
+        {'label': 'মোট পরীক্ষা', 'value': total_exams},
+        {'label': 'গড় স্কোর', 'value': f"{avg_score:.2f}%"},
+        {'label': 'সঠিক উত্তর', 'value': correct_answers},
+        {'label': 'ভুল উত্তর', 'value': wrong_answers},
+    ]
+
     default_widget_order = [
         'user_overview',
         'performance_metrics',
@@ -59,38 +66,38 @@ def user_dashboard(request):
         'quick_links'
     ]
 
-    # Set default widget order if not present
     if not user_preference.widget_order:
         user_preference.widget_order = default_widget_order
         user_preference.save()
     
-    # Convert widget_order to list if it's a string
     widget_order = user_preference.widget_order if isinstance(user_preference.widget_order, list) else user_preference.widget_order.split(',')
 
-    # Widget data dictionary
     widget_data = {
         'user_overview': {'user_profile': user_profile},
-        'performance_metrics': {
-            'total_exams': total_exams,
-            'avg_score': round(avg_score, 2),
-            'correct_answers': correct_answers,
-            'wrong_answers': wrong_answers
-        },
+        'performance_metrics': {'metrics': performance_metrics},
         'recent_results': {'recent_results': recent_results},
         'notifications': {'notifications': notifications},
         'recent_activities': {'recent_activities': recent_activities},
-        'quick_links': {},  # Add quick links here
+        'quick_links': {},
         'upcoming_exams': {'upcoming_exams': upcoming_exams}
     }
 
-    # Select only user-preferred widgets
     selected_widgets = {widget: widget_data[widget] for widget in widget_order if widget in widget_data}
-
+    
+    quick_links = [
+        ('exams:exam_list', 'পরীক্ষা তালিকা'),
+        ('results:overview', 'ফলাফল সারসংক্ষেপ'),
+        ('accounts:account_settings', 'একাউন্ট সেটিংস'),
+        ('dashboard:customize_dashboard', 'ড্যাশবোর্ড কাস্টমাইজ করুন'),
+        ('dashboard:submit_feedback', 'প্রতিক্রিয়া জানান')
+    ]
+    
     context = {
         'user_profile': user_profile,
         'user_preference': user_preference,
         'widget_order': widget_order,
         'widgets': selected_widgets,
+        'quick_links': quick_links,
     }
     return render(request, 'dashboard/dashboard.html', context)
 
@@ -155,11 +162,20 @@ def customize_dashboard(request):
         messages.success(request, 'ড্যাশবোর্ড কাস্টমাইজেশন সফলভাবে সংরক্ষিত হয়েছে।')
         return redirect('dashboard:user_dashboard')
 
+    # Defining layout, color, and widget options
+    layout_options = ["default", "compact", "expanded"]
+    color_options = ["light", "dark", "blue"]
+    widget_options = ["recent_activity", "upcoming_exams", "performance_metrics", "notifications"]
+    
     context = {
         'current_layout': user_preference.dashboard_layout,
         'current_color_scheme': user_preference.color_scheme,
         'current_widget_order': user_preference.widget_order,
+        'layout_options': layout_options,
+        'color_options': color_options,
+        'widget_options': widget_options,
     }
+    
     return render(request, 'dashboard/customize_dashboard.html', context)
 
 @login_required

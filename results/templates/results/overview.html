@@ -1,15 +1,16 @@
+
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="mb-4">ফলাফলের সারসংক্ষেপ</h1>
     <div class="row">
-        {% for title, value in [('মোট পরীক্ষা', total_exams), ('মোট স্কোর', total_score), ('মোট সঠিক উত্তর', total_correct), ('মোট ভুল উত্তর', total_wrong)] %}
+        {% for metric in metrics %}
         <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ title }}</h5>
-                    <p class="card-text display-4">{{ value }}</p>
+                    <h5 class="card-title">{{ metric.0 }}</h5>
+                    <p class="card-text display-4">{{ metric.1 }}</p>
                 </div>
             </div>
         </div>
